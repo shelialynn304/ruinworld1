@@ -13,7 +13,8 @@ window.ui = {
   statGold: null,
   playerNameLabel: null,
   titleScreen: null,
-  gameScreen: null
+  gameScreen: null,
+  activeRenderToken: 0
 };
 
 window.cacheUIElements = function () {
@@ -105,6 +106,7 @@ window.renderChoices = function (scene) {
     btn.className = "choice-btn";
     btn.textContent = choice.text;
     btn.addEventListener("click", () => {
+      if (ui.isTypingSceneText) return;
       if (typeof handleChoiceAction === "function") {
         handleChoiceAction(choice.action);
       }
@@ -136,6 +138,7 @@ window.renderNameEntry = function (scene) {
   submitBtn.className = "choice-btn";
   submitBtn.textContent = "Speak it into the rain.";
   submitBtn.addEventListener("click", () => {
+    if (ui.isTypingSceneText) return;
     if (typeof handleChoiceAction === "function") {
       handleChoiceAction(scene.nameEntryAction || "confirmName");
     }
@@ -156,6 +159,8 @@ window.renderNameEntry = function (scene) {
 };
 
 window.renderScene = async function () {
+  const renderToken = Date.now();
+  ui.activeRenderToken = renderToken;
   const scene = getCurrentScene();
 
   if (!scene) {
@@ -171,24 +176,33 @@ window.renderScene = async function () {
   ui.dialogueText.textContent = "";
 
   updateStatsUI();
-  await typeSceneText(scene.text || []);
+  await typeSceneText(scene.text || [], renderToken);
+  if (ui.activeRenderToken !== renderToken) return;
   renderChoices(scene);
 };
 
-window.typeSceneText = async function (textLines) {
+window.typeSceneText = async function (textLines, renderToken) {
   const fullText = Array.isArray(textLines) ? textLines.join("\n\n") : String(textLines || "");
   ui.dialogueText.textContent = "";
+  ui.isTypingSceneText = true;
 
-  for (let i = 0; i < fullText.length; i += 1) {
-    const char = fullText[i];
-    ui.dialogueText.textContent += char;
+  try {
+    for (let i = 0; i < fullText.length; i += 1) {
+      if (ui.activeRenderToken !== renderToken) return;
+      const char = fullText[i];
+      ui.dialogueText.textContent += char;
 
-    if (window.audioSystem && typeof window.audioSystem.handleTypedCharacter === "function") {
-      window.audioSystem.handleTypedCharacter(char, getCurrentScene()?.speaker || "Narrator");
+      if (window.audioSystem && typeof window.audioSystem.handleTypedCharacter === "function") {
+        window.audioSystem.handleTypedCharacter(char, getCurrentScene()?.speaker || "Narrator");
+      }
+
+      const delay = getTypingDelay(char);
+      await sleep(delay);
     }
-
-    const delay = getTypingDelay(char);
-    await sleep(delay);
+  } finally {
+    if (ui.activeRenderToken === renderToken) {
+      ui.isTypingSceneText = false;
+    }
   }
 };
 

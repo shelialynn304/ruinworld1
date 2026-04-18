@@ -1,5 +1,13 @@
 window.SAVE_KEY = "branch_and_bone_save_v1";
 
+window.getValidSceneId = function (sceneId) {
+  if (sceneId && window.STORY && STORY[sceneId]) {
+    return sceneId;
+  }
+
+  return "intro";
+};
+
 window.getDefaultGameState = function () {
   return {
     playerName: "Wanderer",
@@ -53,6 +61,7 @@ window.loadGame = function () {
     window.gameState = {
       ...defaults,
       ...parsed,
+      currentScene: getValidSceneId(parsed.currentScene),
       flags: {
         ...defaults.flags,
         ...(parsed.flags || {})
@@ -69,4 +78,5 @@ window.loadGame = function () {
 
 window.resetGameState = function () {
   window.gameState = getDefaultGameState();
+  window.gameState.currentScene = getValidSceneId(window.gameState.currentScene);
 };

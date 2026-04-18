@@ -9,6 +9,7 @@ window.startNewGame = async function () {
   } else {
     gameState.currentScene = "intro";
   }
+  gameState.currentScene = getValidSceneId(gameState.currentScene);
   showGameScreen();
   updateStatsUI();
 
@@ -22,6 +23,7 @@ window.startNewGame = async function () {
 window.continueGame = async function () {
   const hadSave = Boolean(localStorage.getItem(SAVE_KEY));
   loadGame();
+  gameState.currentScene = getValidSceneId(gameState.currentScene);
   showGameScreen();
   updateStatsUI();
 
@@ -88,6 +90,9 @@ window.bindCoreButtons = function () {
 window.initializeGame = function () {
   cacheUIElements();
   bindCoreButtons();
+  if (typeof validateChoiceHandlers === "function") {
+    validateChoiceHandlers();
+  }
 
   if (window.audioSystem && typeof window.audioSystem.init === "function") {
     window.audioSystem.init();
