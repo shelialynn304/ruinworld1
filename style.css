@@ -397,3 +397,29 @@ button {
     font-size: 0.98rem;
   }
 }
+
+.name-entry-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.name-entry-label {
+  color: var(--muted);
+  font-size: 0.86rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.name-entry-input {
+  width: 100%;
+  border: 2px solid var(--border);
+  background: linear-gradient(180deg, #181410, #110f0d);
+  color: var(--text);
+  padding: 12px;
+  font: inherit;
+}
+
+.name-entry-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}

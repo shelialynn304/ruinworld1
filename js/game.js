@@ -4,7 +4,11 @@ window.getCurrentScene = function () {
 };
 
 window.startNewGame = async function () {
-  gameState.currentScene = "intro";
+  if (typeof resetGameState === "function") {
+    resetGameState();
+  } else {
+    gameState.currentScene = "intro";
+  }
   showGameScreen();
   updateStatsUI();
 
