@@ -1,41 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chosen of the Hollow Star</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="game-shell">
-    <header class="hud-top">
-      <div class="hud-box">HP: <span id="hp">10</span></div>
-      <div class="hud-box">Gold: <span id="gold">25</span></div>
-      <div class="hud-box">Corruption: <span id="corruption">0</span></div>
-      <div class="hud-box">Area: <span id="area">Starter Field</span></div>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chosen of the Hollow Star</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="crt-overlay" aria-hidden="true"></div>
+    <main class="game-shell" id="app">
+      <section id="titleScreen" class="panel title-screen">
+        <h1>CHOSEN OF THE HOLLOW STAR</h1>
+        <p class="subtitle">An eerie retro narrative RPG</p>
+        <p class="flavor">The bells are silent. The ash remembers your name.</p>
+        <div class="title-actions">
+          <button id="startButton">Start New Journey</button>
+          <button id="continueButton">Continue</button>
+        </div>
+      </section>
 
-    <main class="game-wrap">
-      <canvas id="gameCanvas" width="640" height="480"></canvas>
+      <section id="gameScreen" class="hidden">
+        <header class="top-row">
+          <div class="panel area-panel">
+            <span class="label">AREA</span>
+            <span id="areaLabel">The Road to Ash</span>
+          </div>
+          <div class="panel controls-panel">
+            <button id="saveButton">Save</button>
+            <button id="loadButton">Load</button>
+            <button id="musicToggle">Music: On</button>
+            <button id="blipToggle">Blips: On</button>
+          </div>
+        </header>
 
-      <div id="dialogueBox" class="dialogue hidden">
-        <div id="dialogueText" class="dialogue-text"></div>
-        <div id="choiceButtons" class="choice-buttons"></div>
-      </div>
+        <section class="panel stats-panel">
+          <h2>Vessel Status</h2>
+          <div class="stats-grid">
+            <p>Corruption: <span id="statCorruption">0</span></p>
+            <p>Mercy: <span id="statMercy">0</span></p>
+            <p>Influence: <span id="statInfluence">0</span></p>
+            <p>Devotion: <span id="statDevotion">0</span></p>
+            <p>Followers: <span id="statFollowers">0</span></p>
+            <p>Gold: <span id="statGold">10</span></p>
+          </div>
+        </section>
+
+        <section class="panel dialogue-panel" id="dialoguePanel">
+          <div class="speaker-row">
+            <span class="label">SPEAKER</span>
+            <span id="speakerName">Narrator</span>
+          </div>
+          <p id="dialogueText" class="dialogue-text"></p>
+          <div id="choiceList" class="choice-list"></div>
+        </section>
+      </section>
     </main>
 
-    <div id="inventory" class="hud-box">
-  Inventory: <span id="invText">Empty</span>
-</div>
-
-    <footer class="controls-panel">
-      <button id="saveBtn">Save</button>
-      <button id="loadBtn">Load</button>
-      <button id="resetBtn">Reset</button>
-      <span class="tip">Move: WASD or Arrow Keys • Interact: E</span>
-    </footer>
-  </div>
-
-  <script type="module" src="js/main.js"></script>
-</body>
+    <script type="module" src="game.js"></script>
+  </body>
 </html>
