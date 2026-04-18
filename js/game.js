@@ -16,6 +16,7 @@ window.startNewGame = async function () {
 };
 
 window.continueGame = async function () {
+  const hadSave = Boolean(localStorage.getItem(SAVE_KEY));
   loadGame();
   showGameScreen();
   updateStatsUI();
@@ -25,6 +26,10 @@ window.continueGame = async function () {
   }
 
   await renderScene();
+
+  if (!hadSave) {
+    ui.dialogueText.textContent = "No save was found. A new road has been prepared for you.";
+  }
 };
 
 window.bindCoreButtons = function () {
@@ -32,6 +37,7 @@ window.bindCoreButtons = function () {
   const continueBtn = document.getElementById("continue-game-btn");
   const saveBtn = document.getElementById("save-btn");
   const loadBtn = document.getElementById("load-btn");
+  const resetBtn = document.getElementById("reset-btn");
   const musicToggleBtn = document.getElementById("music-toggle-btn");
   const textSoundToggleBtn = document.getElementById("text-sound-toggle-btn");
 
@@ -50,6 +56,14 @@ window.bindCoreButtons = function () {
   loadBtn.addEventListener("click", async () => {
     loadGame();
     showGameScreen();
+    updateStatsUI();
+    await renderScene();
+  });
+
+  resetBtn.addEventListener("click", async () => {
+    localStorage.removeItem(SAVE_KEY);
+    resetGameState();
+    showTitleScreen();
     updateStatsUI();
     await renderScene();
   });
