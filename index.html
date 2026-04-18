@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chosen of the Hollow Star</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-shell">
+    <header class="hud-top">
+      <div class="hud-box">HP: <span id="hp">10</span></div>
+      <div class="hud-box">Gold: <span id="gold">25</span></div>
+      <div class="hud-box">Corruption: <span id="corruption">0</span></div>
+      <div class="hud-box">Area: <span id="area">Starter Field</span></div>
+    </header>
+
+    <main class="game-wrap">
+      <canvas id="gameCanvas" width="640" height="480"></canvas>
+
+      <div id="dialogueBox" class="dialogue hidden">
+        <div id="dialogueText" class="dialogue-text"></div>
+        <div id="choiceButtons" class="choice-buttons"></div>
+      </div>
+    </main>
+
+    <footer class="controls-panel">
+      <button id="saveBtn">Save</button>
+      <button id="loadBtn">Load</button>
+      <button id="resetBtn">Reset</button>
+      <span class="tip">Move: WASD or Arrow Keys • Interact: E</span>
+    </footer>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
