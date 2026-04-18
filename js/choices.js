@@ -10,18 +10,22 @@ window.CHOICE_HANDLERS = {
   temperamentReflective() {
     gameState.temperament = "reflective";
     gameState.mercy += 1;
+    gameState.doubt += 1;
     gameState.graveClue = "fresh shovel cuts around the open grave";
     gameState.currentScene = "memoryOrigin";
   },
   temperamentStoic() {
     gameState.temperament = "stoic";
     gameState.influence += 1;
+    gameState.conviction += 1;
     gameState.graveClue = "boot marks leading from the grave toward the chapel";
     gameState.currentScene = "memoryOrigin";
   },
   temperamentDefiant() {
     gameState.temperament = "defiant";
     gameState.corruption += 1;
+    gameState.fear = Math.max(0, gameState.fear - 1);
+    gameState.conviction += 1;
     gameState.graveClue = "a broken grave marker carved with a crown sigil";
     gameState.currentScene = "memoryOrigin";
   },
@@ -29,48 +33,59 @@ window.CHOICE_HANDLERS = {
     gameState.origin = "bell-keeper";
     gameState.memoryState = "stirring";
     gameState.devotion += 1;
+    gameState.doubt += 1;
     gameState.currentScene = "memoryMotive";
   },
   setOriginOathbound() {
     gameState.origin = "oathbound-soldier";
     gameState.memoryState = "stirring";
     gameState.influence += 1;
+    gameState.conviction += 1;
     gameState.currentScene = "memoryMotive";
   },
   setOriginScriptor() {
     gameState.origin = "forbidden-scriptor";
     gameState.memoryState = "stirring";
     gameState.corruption += 1;
+    gameState.doubt += 1;
     gameState.currentScene = "memoryMotive";
   },
   setMotiveRedemption() {
     gameState.motive = "redemption";
     gameState.mercy += 1;
+    gameState.fear += 1;
     gameState.currentScene = "memoryProphecy";
   },
   setMotivePower() {
     gameState.motive = "power";
     gameState.corruption += 1;
+    gameState.conviction += 1;
     gameState.currentScene = "memoryProphecy";
   },
   setMotiveRevenge() {
     gameState.motive = "revenge";
     gameState.influence += 1;
+    gameState.fear = Math.max(0, gameState.fear - 1);
+    gameState.conviction += 1;
     gameState.currentScene = "memoryProphecy";
   },
   setProphecyFaith() {
     gameState.prophecyStance = "faith";
     gameState.devotion += 1;
+    gameState.conviction += 1;
     gameState.currentScene = "chapelApproach";
   },
   setProphecyDefiance() {
     gameState.prophecyStance = "defiance";
     gameState.influence += 1;
+    gameState.doubt += 1;
+    gameState.conviction += 1;
     gameState.currentScene = "chapelApproach";
   },
   setProphecyManipulate() {
     gameState.prophecyStance = "manipulate";
     gameState.corruption += 1;
+    gameState.doubt += 1;
     gameState.currentScene = "chapelApproach";
   },
   circleChapel() {
@@ -93,15 +108,18 @@ window.CHOICE_HANDLERS = {
   threatenOldWoman() {
     gameState.flags.threatenedMara = true;
     gameState.corruption += 1;
+    gameState.fear = Math.max(0, gameState.fear - 1);
     gameState.currentScene = "oldWomanThreatened";
   },
   backDownToMara() {
     gameState.mercy += 1;
+    gameState.fear += 1;
     gameState.currentScene = "oldWomanIdentity";
   },
   doubleThreatenMara() {
     gameState.flags.threatenedMara = true;
     gameState.corruption += 1;
+    gameState.conviction += 1;
     gameState.currentScene = "oldWomanThreatened";
   },
   askWhyHere() {
@@ -110,24 +128,29 @@ window.CHOICE_HANDLERS = {
   askMaraHelp() {
     gameState.flags.trustedMara = true;
     gameState.devotion += 1;
+    gameState.doubt += 1;
     gameState.currentScene = "chapelEntry";
   },
   insultMara() {
     gameState.flags.insultedMara = true;
     gameState.corruption += 1;
+    gameState.fear = Math.max(0, gameState.fear - 1);
     gameState.currentScene = "chapelEntry";
   },
   tryToLeave() {
     gameState.mercy += 1;
+    gameState.fear += 1;
     gameState.currentScene = "chapelEntry";
   },
   acceptStrangeness() {
     gameState.devotion += 1;
+    gameState.conviction += 1;
     gameState.currentScene = "chapelEntry";
   },
   approachAltar() {
     if (!gameState.flags.approachedAltar) {
       gameState.devotion += 1;
+      gameState.conviction += 1;
       gameState.flags.approachedAltar = true;
     }
     gameState.currentScene = "chapelAltar";
@@ -135,6 +158,7 @@ window.CHOICE_HANDLERS = {
   inspectMural() {
     if (!gameState.flags.inspectedMural) {
       gameState.influence += 1;
+      gameState.doubt += 1;
       gameState.flags.inspectedMural = true;
     }
     gameState.currentScene = "chapelMural";

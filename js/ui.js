@@ -9,6 +9,9 @@ window.ui = {
   statMercy: null,
   statInfluence: null,
   statDevotion: null,
+  statConviction: null,
+  statFear: null,
+  statDoubt: null,
   statFollowers: null,
   statGold: null,
   playerNameLabel: null,
@@ -29,6 +32,9 @@ window.cacheUIElements = function () {
   ui.statMercy = document.getElementById("stat-mercy");
   ui.statInfluence = document.getElementById("stat-influence");
   ui.statDevotion = document.getElementById("stat-devotion");
+  ui.statConviction = document.getElementById("stat-conviction");
+  ui.statFear = document.getElementById("stat-fear");
+  ui.statDoubt = document.getElementById("stat-doubt");
   ui.statFollowers = document.getElementById("stat-followers");
   ui.statGold = document.getElementById("stat-gold");
   ui.playerNameLabel = document.getElementById("player-name-label");
@@ -55,6 +61,9 @@ window.updateStatsUI = function () {
   ui.statMercy.textContent = gameState.mercy;
   ui.statInfluence.textContent = gameState.influence;
   ui.statDevotion.textContent = gameState.devotion;
+  ui.statConviction.textContent = gameState.conviction;
+  ui.statFear.textContent = gameState.fear;
+  ui.statDoubt.textContent = gameState.doubt;
   ui.statFollowers.textContent = gameState.followerCount;
   ui.statGold.textContent = gameState.gold;
 
