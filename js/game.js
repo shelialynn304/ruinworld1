@@ -1,4 +1,7 @@
 import { keys } from "./input.js";
+            closeDialogue();
+          },
+        },
       ]
     );
   }
@@ -11,12 +14,23 @@ import { keys } from "./input.js";
 
   function drawPlayer() {
     const p = state.player;
+    const flashing = p.invulnerableFrames > 0 && p.invulnerableFrames % 6 < 3;
+    if (flashing) return;
+
     ctx.fillStyle = state.corruption >= 10 ? "#d66aa7" : "#6aa7d6";
     ctx.fillRect(p.x, p.y, p.width, p.height);
 
     ctx.fillStyle = "#111";
     ctx.fillRect(p.x + 4, p.y + 5, 4, 4);
     ctx.fillRect(p.x + 14, p.y + 5, 4, 4);
+  }
+
+  function drawAttackSlash() {
+    if (state.player.attackCooldown < 12 && state.player.attackCooldown > 0) {
+      const box = getAttackBox();
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.fillRect(box.x, box.y, box.width, box.height);
+    }
   }
 
   function drawShrineGlow() {
@@ -29,7 +43,9 @@ import { keys } from "./input.js";
     drawWorld(ctx, state);
     drawShrineGlow();
     drawNPC(ctx, state);
+    drawEnemy(ctx, enemy, state);
     drawPlayer();
+    drawAttackSlash();
   }
 
   function loop() {
@@ -46,6 +62,7 @@ import { keys } from "./input.js";
     setState,
     resetState() {
       state = structuredClone(defaultState);
+      Object.assign(enemy, createEnemy(420, 240));
       npc.interacted = false;
       syncHud();
     },
