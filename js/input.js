@@ -4,6 +4,7 @@ export const keys = {
   left: false,
   right: false,
   interact: false,
+  attack: false,
 };
 
 export function setupInput() {
@@ -13,6 +14,10 @@ export function setupInput() {
     if (["ArrowLeft", "a", "A"].includes(e.key)) keys.left = true;
     if (["ArrowRight", "d", "D"].includes(e.key)) keys.right = true;
     if (["e", "E"].includes(e.key)) keys.interact = true;
+    if ([" ", "Spacebar"].includes(e.key)) {
+      e.preventDefault();
+      keys.attack = true;
+    }
   });
 
   window.addEventListener("keyup", (e) => {
@@ -21,5 +26,6 @@ export function setupInput() {
     if (["ArrowLeft", "a", "A"].includes(e.key)) keys.left = false;
     if (["ArrowRight", "d", "D"].includes(e.key)) keys.right = false;
     if (["e", "E"].includes(e.key)) keys.interact = false;
+    if ([" ", "Spacebar"].includes(e.key)) keys.attack = false;
   });
 }
