@@ -277,5 +277,47 @@ window.STORY = {
         action: "returnToMara"
       }
     ]
+  },
+
+  chapelAltar: {
+    id: "chapelAltar",
+    area: "Ruined Chapel",
+    speaker: "Narrator",
+    text: [
+      "Your fingers hover over the altar's edge, and the stone feels colder than winter iron.",
+      "A quiet ache settles in your chest, as if a forgotten vow has just been spoken aloud.",
+      "When you step back, the chapel seems to hold its breath."
+    ],
+    choices: [
+      {
+        text: "Study the mural before you leave.",
+        action: "inspectMural"
+      },
+      {
+        text: "Return to Mara outside.",
+        action: "returnToMara"
+      }
+    ]
+  },
+
+  chapelMural: {
+    id: "chapelMural",
+    area: "Ruined Chapel",
+    speaker: "Narrator",
+    text: [
+      "The crowned figure in the mural has no face, only a web of cracks where features should be.",
+      "Painted eyes around the halo all seem to tilt toward you when you move.",
+      "Whatever this chapel worshipped, it expected witnesses."
+    ],
+    choices: [
+      {
+        text: "Approach the altar in silence.",
+        action: "approachAltar"
+      },
+      {
+        text: "Return to Mara outside.",
+        action: "returnToMara"
+      }
+    ]
   }
 };

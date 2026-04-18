@@ -31,7 +31,9 @@ window.getDefaultGameState = function () {
       tookRoadCoins: false,
       threatenedMara: false,
       trustedMara: false,
-      insultedMara: false
+      insultedMara: false,
+      approachedAltar: false,
+      inspectedMural: false
     }
   };
 };
