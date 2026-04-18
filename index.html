@@ -3,39 +3,121 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chosen of the Hollow Star</title>
+  <title>Branch and Bone</title>
+  <meta name="description" content="A dark fantasy retro narrative RPG built for the browser." />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="game-shell">
-    <header class="hud-top">
-      <div class="hud-box">HP: <span id="hp">10</span></div>
-      <div class="hud-box">Gold: <span id="gold">25</span></div>
-      <div class="hud-box">Corruption: <span id="corruption">0</span></div>
-      <div class="hud-box">Area: <span id="area">Starter Field</span></div>
+    <header class="top-bar">
+      <div class="brand-block">
+        <h1 class="game-title">Branch and Bone</h1>
+        <p class="game-subtitle">A dark fantasy narrative RPG</p>
+      </div>
+
+      <div class="top-controls">
+        <button id="music-toggle-btn" class="small-btn" type="button">Music: Off</button>
+        <button id="text-sound-toggle-btn" class="small-btn" type="button">Text Sounds: On</button>
+        <button id="save-btn" class="small-btn" type="button">Save</button>
+        <button id="load-btn" class="small-btn" type="button">Load</button>
+      </div>
     </header>
 
-    <main class="game-wrap">
-      <canvas id="gameCanvas" width="640" height="480"></canvas>
+    <main class="main-layout">
+      <aside class="stats-panel">
+        <h2 class="panel-title">Wanderer</h2>
+        <div class="stat-row">
+          <span>Area</span>
+          <strong id="area-label">Unknown</strong>
+        </div>
+        <div class="stat-row">
+          <span>Corruption</span>
+          <strong id="stat-corruption">0</strong>
+        </div>
+        <div class="stat-row">
+          <span>Mercy</span>
+          <strong id="stat-mercy">0</strong>
+        </div>
+        <div class="stat-row">
+          <span>Influence</span>
+          <strong id="stat-influence">0</strong>
+        </div>
+        <div class="stat-row">
+          <span>Devotion</span>
+          <strong id="stat-devotion">0</strong>
+        </div>
+        <div class="stat-row">
+          <span>Followers</span>
+          <strong id="stat-followers">0</strong>
+        </div>
+        <div class="stat-row">
+          <span>Gold</span>
+          <strong id="stat-gold">0</strong>
+        </div>
 
-      <div id="dialogueBox" class="dialogue hidden">
-        <div id="dialogueText" class="dialogue-text"></div>
-        <div id="choiceButtons" class="choice-buttons"></div>
-      </div>
+        <div class="panel-divider"></div>
+
+        <h3 class="mini-title">Relics</h3>
+        <ul id="relic-list" class="relic-list">
+          <li>None</li>
+        </ul>
+      </aside>
+
+      <section class="scene-panel">
+        <div id="title-screen" class="title-screen">
+          <div class="title-card">
+            <p class="eyebrow">Old roads remember blood.</p>
+            <h2>Branch and Bone</h2>
+            <p class="intro-copy">
+              The bells have gone silent. The chapels rot from the inside.
+              Somewhere beyond the dead roads, something is still choosing who will kneel and who will be crowned.
+            </p>
+
+            <div class="title-actions">
+              <button id="start-game-btn" class="main-btn" type="button">Start Game</button>
+              <button id="continue-game-btn" class="ghost-btn" type="button">Continue</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="game-screen" class="game-screen hidden">
+          <div class="scene-art-frame">
+            <div class="scene-art">
+              <div class="scene-vignette"></div>
+              <div class="scene-label-wrap">
+                <span class="scene-label">Scene</span>
+                <h2 id="scene-title">The Road to Ash</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="dialogue-box">
+            <div class="speaker-row">
+              <span class="speaker-tag">Speaker</span>
+              <strong id="speaker-name">Narrator</strong>
+            </div>
+
+            <div id="dialogue-text" class="dialogue-text">
+              The road waits.
+            </div>
+
+            <div id="choices-container" class="choices-container"></div>
+
+            <div class="dialogue-footer">
+              <span class="footer-note">Choices shape the road ahead.</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
-
-    <div id="inventory" class="hud-box">
-  Inventory: <span id="invText">Empty</span>
-</div>
-
-    <footer class="controls-panel">
-      <button id="saveBtn">Save</button>
-      <button id="loadBtn">Load</button>
-      <button id="resetBtn">Reset</button>
-      <span class="tip">Move: WASD or Arrow Keys • Interact: E</span>
-    </footer>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script src="state.js"></script>
+  <script src="story.js"></script>
+  <script src="choices.js"></script>
+  <script src="save.js"></script>
+  <script src="audio.js"></script>
+  <script src="ui.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
