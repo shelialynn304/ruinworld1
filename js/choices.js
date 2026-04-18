@@ -126,10 +126,18 @@ window.CHOICE_HANDLERS = {
     gameState.currentScene = "chapelEntry";
   },
   approachAltar() {
-    gameState.devotion += 1;
+    if (!gameState.flags.approachedAltar) {
+      gameState.devotion += 1;
+      gameState.flags.approachedAltar = true;
+    }
+    gameState.currentScene = "chapelAltar";
   },
   inspectMural() {
-    gameState.influence += 1;
+    if (!gameState.flags.inspectedMural) {
+      gameState.influence += 1;
+      gameState.flags.inspectedMural = true;
+    }
+    gameState.currentScene = "chapelMural";
   },
   returnToMara() {
     gameState.currentScene = "chapelExterior";

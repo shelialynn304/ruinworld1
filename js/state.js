@@ -20,6 +20,8 @@ window.gameState = {
     tookRoadCoins: false,
     threatenedMara: false,
     trustedMara: false,
-    insultedMara: false
+    insultedMara: false,
+    approachedAltar: false,
+    inspectedMural: false
   }
 };
