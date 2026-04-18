@@ -11,6 +11,7 @@ window.ui = {
   statDevotion: null,
   statFollowers: null,
   statGold: null,
+  playerNameLabel: null,
   titleScreen: null,
   gameScreen: null
 };
@@ -29,6 +30,7 @@ window.cacheUIElements = function () {
   ui.statDevotion = document.getElementById("stat-devotion");
   ui.statFollowers = document.getElementById("stat-followers");
   ui.statGold = document.getElementById("stat-gold");
+  ui.playerNameLabel = document.getElementById("player-name-label");
 
   ui.titleScreen = document.getElementById("title-screen");
   ui.gameScreen = document.getElementById("game-screen");
@@ -55,6 +57,10 @@ window.updateStatsUI = function () {
   ui.statFollowers.textContent = gameState.followerCount;
   ui.statGold.textContent = gameState.gold;
 
+  if (ui.playerNameLabel) {
+    ui.playerNameLabel.textContent = gameState.playerName || "Wanderer";
+  }
+
   renderRelics();
 };
 
@@ -75,8 +81,15 @@ window.renderRelics = function () {
   });
 };
 
-window.renderChoices = function (choices) {
+window.renderChoices = function (scene) {
   ui.choicesContainer.innerHTML = "";
+
+  if (scene?.nameEntry) {
+    renderNameEntry(scene);
+    return;
+  }
+
+  const choices = scene?.choices || [];
 
   if (!choices || choices.length === 0) {
     const endNote = document.createElement("div");
@@ -100,6 +113,48 @@ window.renderChoices = function (choices) {
   });
 };
 
+window.renderNameEntry = function (scene) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "name-entry-wrap";
+
+  const label = document.createElement("label");
+  label.className = "name-entry-label";
+  label.setAttribute("for", "name-entry-input");
+  label.textContent = scene.nameEntryLabel || "Name";
+
+  const input = document.createElement("input");
+  input.id = "name-entry-input";
+  input.className = "name-entry-input";
+  input.type = "text";
+  input.maxLength = 24;
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.placeholder = "Wanderer";
+
+  const submitBtn = document.createElement("button");
+  submitBtn.type = "button";
+  submitBtn.className = "choice-btn";
+  submitBtn.textContent = "Speak it into the rain.";
+  submitBtn.addEventListener("click", () => {
+    if (typeof handleChoiceAction === "function") {
+      handleChoiceAction(scene.nameEntryAction || "confirmName");
+    }
+  });
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      submitBtn.click();
+    }
+  });
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(input);
+  wrapper.appendChild(submitBtn);
+  ui.choicesContainer.appendChild(wrapper);
+  input.focus();
+};
+
 window.renderScene = async function () {
   const scene = getCurrentScene();
 
@@ -117,7 +172,7 @@ window.renderScene = async function () {
 
   updateStatsUI();
   await typeSceneText(scene.text || []);
-  renderChoices(scene.choices || []);
+  renderChoices(scene);
 };
 
 window.typeSceneText = async function (textLines) {

@@ -1,36 +1,88 @@
 window.handleChoiceAction = async function (action) {
   const handlers = {
-    searchRoad() {
-      gameState.currentScene = "roadSearch";
+    beginNameEntry() {
+      gameState.currentScene = "namePrompt";
     },
-    prayAtRoad() {
-      gameState.flags.prayedAtRoad = true;
-      gameState.devotion += 1;
-      gameState.currentScene = "roadPrayer";
+    confirmName() {
+      const enteredName = getEnteredName();
+      gameState.playerName = enteredName || "Wanderer";
+      gameState.currentScene = "afterName";
     },
-    prayAgain() {
-      gameState.flags.prayedAtRoad = true;
+    temperamentReflective() {
+      gameState.temperament = "reflective";
+      gameState.mercy += 1;
+      gameState.graveClue = "fresh shovel cuts around the open grave";
+      gameState.currentScene = "memoryOrigin";
+    },
+    temperamentStoic() {
+      gameState.temperament = "stoic";
+      gameState.influence += 1;
+      gameState.graveClue = "boot marks leading from the grave toward the chapel";
+      gameState.currentScene = "memoryOrigin";
+    },
+    temperamentDefiant() {
+      gameState.temperament = "defiant";
+      gameState.corruption += 1;
+      gameState.graveClue = "a broken grave marker carved with a crown sigil";
+      gameState.currentScene = "memoryOrigin";
+    },
+    setOriginBellKeeper() {
+      gameState.origin = "bell-keeper";
+      gameState.memoryState = "stirring";
       gameState.devotion += 1;
+      gameState.currentScene = "memoryMotive";
+    },
+    setOriginOathbound() {
+      gameState.origin = "oathbound-soldier";
+      gameState.memoryState = "stirring";
+      gameState.influence += 1;
+      gameState.currentScene = "memoryMotive";
+    },
+    setOriginScriptor() {
+      gameState.origin = "forbidden-scriptor";
+      gameState.memoryState = "stirring";
+      gameState.corruption += 1;
+      gameState.currentScene = "memoryMotive";
+    },
+    setMotiveRedemption() {
+      gameState.motive = "redemption";
+      gameState.mercy += 1;
+      gameState.currentScene = "memoryProphecy";
+    },
+    setMotivePower() {
+      gameState.motive = "power";
+      gameState.corruption += 1;
+      gameState.currentScene = "memoryProphecy";
+    },
+    setMotiveRevenge() {
+      gameState.motive = "revenge";
+      gameState.influence += 1;
+      gameState.currentScene = "memoryProphecy";
+    },
+    setProphecyFaith() {
+      gameState.prophecyStance = "faith";
+      gameState.devotion += 1;
+      gameState.currentScene = "chapelApproach";
+    },
+    setProphecyDefiance() {
+      gameState.prophecyStance = "defiance";
+      gameState.influence += 1;
+      gameState.currentScene = "chapelApproach";
+    },
+    setProphecyManipulate() {
+      gameState.prophecyStance = "manipulate";
+      gameState.corruption += 1;
+      gameState.currentScene = "chapelApproach";
+    },
+    circleChapel() {
       gameState.influence += 1;
       gameState.currentScene = "chapelExterior";
     },
+    hailMaraFromPath() {
+      gameState.devotion += 1;
+      gameState.currentScene = "chapelExterior";
+    },
     goToChapel() {
-      gameState.currentScene = "chapelExterior";
-    },
-    takeCoinsAndCharm() {
-      gameState.gold += 12;
-      gameState.flags.tookRoadCoins = true;
-      gameState.flags.foundBoneCharm = true;
-      addRelic("Bone Charm");
-      gameState.currentScene = "chapelExterior";
-    },
-    takeCoinsOnly() {
-      gameState.gold += 12;
-      gameState.flags.tookRoadCoins = true;
-      gameState.currentScene = "chapelExterior";
-    },
-    leaveRoadItems() {
-      gameState.mercy += 1;
       gameState.currentScene = "chapelExterior";
     },
     askOldWomanIdentity() {
@@ -94,6 +146,11 @@ window.handleChoiceAction = async function (action) {
 
   updateStatsUI();
   await renderScene();
+};
+
+window.getEnteredName = function () {
+  const input = document.getElementById("name-entry-input");
+  return input ? input.value.trim() : "";
 };
 
 function addRelic(relicName) {

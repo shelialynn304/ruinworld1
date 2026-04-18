@@ -1,71 +1,156 @@
 window.STORY = {
   intro: {
     id: "intro",
-    area: "The Road to Ash",
+    area: "Blackgrave Cemetery",
     speaker: "Narrator",
     text: [
-      "The bells have been silent for thirteen nights.",
-      "The roads are empty now, except for the desperate and the chosen.",
-      "At the edge of a dead village, beneath a sky the color of old bruises, your journey begins."
+      "Cold dirt clings to your hands.",
+      "You wake between leaning gravestones beneath a sky gone nearly black, the air thick and metallic. An open grave yawns nearby. Beyond the cemetery, the chapel stands dark against the hills, like a hand raised to a sky that has forgotten how to answer.",
+      "Thunder rolls somewhere far off. Then closer.",
+      "The graveyard does not answer when you call into it.\nPerhaps it is waiting for you to remember who is speaking.",
+      "What name still belongs to you?"
     ],
     choices: [
       {
-        text: "Walk toward the ruined chapel.",
-        action: "goToChapel"
-      },
-      {
-        text: "Search the road for anything useful.",
-        action: "searchRoad"
-      },
-      {
-        text: "Whisper a prayer to whatever still listens.",
-        action: "prayAtRoad"
+        text: "Speak the name that still answers inside you.",
+        action: "beginNameEntry"
       }
     ]
   },
 
-  roadSearch: {
-    id: "roadSearch",
-    area: "The Road to Ash",
+  namePrompt: {
+    id: "namePrompt",
+    area: "Blackgrave Cemetery",
     speaker: "Narrator",
     text: [
-      "You crouch beside the cracked stones and sift through mud, ash, and rotten cloth.",
-      "Most of the dead were stripped before burial. Or after.",
-      "Your fingers close around a small pouch of coins and a thin charm carved from bone."
+      "Your tongue hesitates, as if your own life were written in a hand you no longer recognize.",
+      "Say your name into the storm before it takes the chance from you."
+    ],
+    nameEntry: true,
+    nameEntryLabel: "Name",
+    nameEntryAction: "confirmName"
+  },
+
+  afterName: {
+    id: "afterName",
+    area: "Blackgrave Cemetery",
+    speaker: "Narrator",
+    text: [
+      "The name feels strange in your mouth, but not false.",
+      "Wind moves through the cemetery grass and makes the crooked markers whisper to one another.",
+      "The first drops of rain strike stone and skin. Lightning briefly reshapes the graveyard into bone-white lines and broken shadows.",
+      "The storm is almost here.",
+      "Some part of your memory stirs, jagged and incomplete. You choose what kind of self survives first."
     ],
     choices: [
       {
-        text: "Take both.",
-        action: "takeCoinsAndCharm"
+        text: "Kneel at the open grave and read what the soil remembers.",
+        action: "temperamentReflective"
       },
       {
-        text: "Take only the coins.",
-        action: "takeCoinsOnly"
+        text: "Stand and watch the chapel through the rain, measuring the path.",
+        action: "temperamentStoic"
       },
       {
-        text: "Leave them. The dead can keep their things.",
-        action: "leaveRoadItems"
+        text: "Call into the dark again, daring whatever listens to answer.",
+        action: "temperamentDefiant"
       }
     ]
   },
 
-  roadPrayer: {
-    id: "roadPrayer",
-    area: "The Road to Ash",
+  memoryOrigin: {
+    id: "memoryOrigin",
+    area: "Blackgrave Cemetery",
     speaker: "Narrator",
     text: [
-      "You lower your head and speak softly into the cold air.",
-      "No answer comes.",
-      "But the wind shifts, and for a moment it feels as if something noticed you."
+      "A memory fragment catches, then tears free.",
+      "It could be true. It could be a lie you have lived too long. Choose the shard that feels least wrong."
     ],
     choices: [
       {
-        text: "Continue to the chapel.",
+        text: "A village bell-rope burned your palms before the bells went silent.",
+        action: "setOriginBellKeeper"
+      },
+      {
+        text: "You marched under a lord's banner until the banner drowned in mud.",
+        action: "setOriginOathbound"
+      },
+      {
+        text: "You copied forbidden verses by candlelight in a locked scriptorium.",
+        action: "setOriginScriptor"
+      }
+    ]
+  },
+
+  memoryMotive: {
+    id: "memoryMotive",
+    area: "Blackgrave Cemetery",
+    speaker: "Narrator",
+    text: [
+      "Another shard surfaces, sharper than the first.",
+      "Why did you come this far into dead ground?"
+    ],
+    choices: [
+      {
+        text: "To find someone you failed and drag them back from the dark.",
+        action: "setMotiveRedemption"
+      },
+      {
+        text: "To claim the power whispered beneath ruined chapels.",
+        action: "setMotivePower"
+      },
+      {
+        text: "To learn who arranged your death and walk back into their fire.",
+        action: "setMotiveRevenge"
+      }
+    ]
+  },
+
+  memoryProphecy: {
+    id: "memoryProphecy",
+    area: "Blackgrave Cemetery",
+    speaker: "Narrator",
+    text: [
+      "A final fragment arrives with the thunder: a warning about a crowned shadow and a chapel door.",
+      "Prophecy has teeth. Decide whether you offer it your throat."
+    ],
+    choices: [
+      {
+        text: "Accept it. Fate may be cruel, but it still points somewhere.",
+        action: "setProphecyFaith"
+      },
+      {
+        text: "Resist it. Prophecy is a chain dressed as guidance.",
+        action: "setProphecyDefiance"
+      },
+      {
+        text: "Use it. Let others fear fate while you learn to steer it.",
+        action: "setProphecyManipulate"
+      }
+    ]
+  },
+
+  chapelApproach: {
+    id: "chapelApproach",
+    area: "Path to the Chapel",
+    speaker: "Narrator",
+    text: [
+      "Rain hardens. The wind drives you between toppled stones toward the chapel hill.",
+      "Each flash of lightning remakes the path, but the door remains: black, patient, waiting.",
+      "A lone figure stands at the chapel steps as if she has been expecting your footsteps in this storm."
+    ],
+    choices: [
+      {
+        text: "Climb the hill and face the waiting woman.",
         action: "goToChapel"
       },
       {
-        text: "Stand and say the prayer again, louder.",
-        action: "prayAgain"
+        text: "Circle the chapel first, searching for another way in.",
+        action: "circleChapel"
+      },
+      {
+        text: "Call to the woman and demand her name before you get closer.",
+        action: "hailMaraFromPath"
       }
     ]
   },
@@ -76,7 +161,7 @@ window.STORY = {
     speaker: "Old Woman",
     text: [
       "The chapel leans like a dying thing, one bell tower split down the middle.",
-      "An old woman waits on the steps, wrapped in gray cloth and watching you without fear.",
+      "An old woman waits on the steps, rain beading on gray cloth and eyes that do not blink away the lightning.",
       "\"You took your time,\" she says. \"That usually means doubt. Or brains. Both are rare.\""
     ],
     choices: [

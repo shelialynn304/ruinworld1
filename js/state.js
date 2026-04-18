@@ -8,6 +8,12 @@ window.gameState = {
   followerCount: 0,
   gold: 0,
   relics: [],
+  origin: null,
+  motive: null,
+  prophecyStance: null,
+  temperament: "uncertain",
+  memoryState: "fractured",
+  graveClue: null,
   flags: {
     prayedAtRoad: false,
     foundBoneCharm: false,
