@@ -6,22 +6,10 @@
   <title>Branch and Bone</title>
   <meta name="description" content="A dark fantasy retro narrative RPG built for the browser." />
   <link rel="canonical" href="https://edgeoverluck.com/" />
-
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Branch and Bone" />
   <meta property="og:description" content="A dark fantasy retro narrative RPG built for the browser." />
   <meta property="og:url" content="https://edgeoverluck.com/" />
-
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Branch and Bone",
-      "url": "https://edgeoverluck.com/",
-      "description": "A dark fantasy retro narrative RPG built for the browser."
-    }
-  </script>
-
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -44,53 +32,19 @@
     <main class="main-layout">
       <aside class="stats-panel">
         <h2 id="player-name-label" class="panel-title">Wanderer</h2>
-        <div class="stat-row">
-          <span>Area</span>
-          <strong id="area-label">Unknown</strong>
-        </div>
-        <div class="stat-row">
-          <span>Corruption</span>
-          <strong id="stat-corruption">0</strong>
-        </div>
-        <div class="stat-row">
-          <span>Mercy</span>
-          <strong id="stat-mercy">0</strong>
-        </div>
-        <div class="stat-row">
-          <span>Influence</span>
-          <strong id="stat-influence">0</strong>
-        </div>
-        <div class="stat-row">
-          <span>Devotion</span>
-          <strong id="stat-devotion">0</strong>
-        </div>
-        <div class="stat-row">
-          <span>Conviction</span>
-          <strong id="stat-conviction">0</strong>
-        </div>
-        <div class="stat-row">
-          <span>Fear</span>
-          <strong id="stat-fear">0</strong>
-        </div>
-        <div class="stat-row">
-          <span>Doubt</span>
-          <strong id="stat-doubt">0</strong>
-        </div>
-        <div class="stat-row">
-          <span>Followers</span>
-          <strong id="stat-followers">0</strong>
-        </div>
-        <div class="stat-row">
-          <span>Gold</span>
-          <strong id="stat-gold">0</strong>
-        </div>
-
+        <div class="stat-row"><span>Area</span><strong id="area-label">Blackgrave Cemetery</strong></div>
+        <div class="stat-row"><span>Corruption</span><strong id="stat-corruption">0</strong></div>
+        <div class="stat-row"><span>Mercy</span><strong id="stat-mercy">0</strong></div>
+        <div class="stat-row"><span>Influence</span><strong id="stat-influence">0</strong></div>
+        <div class="stat-row"><span>Devotion</span><strong id="stat-devotion">0</strong></div>
+        <div class="stat-row"><span>Conviction</span><strong id="stat-conviction">0</strong></div>
+        <div class="stat-row"><span>Fear</span><strong id="stat-fear">0</strong></div>
+        <div class="stat-row"><span>Doubt</span><strong id="stat-doubt">0</strong></div>
+        <div class="stat-row"><span>Followers</span><strong id="stat-followers">0</strong></div>
+        <div class="stat-row"><span>Gold</span><strong id="stat-gold">0</strong></div>
         <div class="panel-divider"></div>
-
         <h3 class="mini-title">Relics</h3>
-        <ul id="relic-list" class="relic-list">
-          <li>None</li>
-        </ul>
+        <ul id="relic-list" class="relic-list"><li>None</li></ul>
       </aside>
 
       <section class="scene-panel">
@@ -99,10 +53,9 @@
             <p class="eyebrow">Old roads remember blood.</p>
             <h2>Branch and Bone</h2>
             <p class="intro-copy">
-              The bells have gone silent. The chapels rot from the inside.
-              Somewhere beyond the dead roads, something is still choosing who will kneel and who will be crowned.
+              You wake in a storm-soaked graveyard, somewhere between memory and prophecy.
+              Walk the cemetery, touch what should stay buried, and decide what kind of soul survives the night.
             </p>
-
             <div class="title-actions">
               <button id="start-game-btn" class="main-btn" type="button">Start Game</button>
               <button id="continue-game-btn" class="ghost-btn" type="button">Continue</button>
@@ -112,12 +65,9 @@
 
         <div id="game-screen" class="game-screen hidden">
           <div class="scene-art-frame">
-            <div class="scene-art">
-              <div class="scene-vignette"></div>
-              <div class="scene-label-wrap">
-                <span class="scene-label">Scene</span>
-                <h2 id="scene-title">The Road to Ash</h2>
-              </div>
+            <div class="canvas-wrap">
+              <canvas id="game-canvas" aria-label="Graveyard map" role="img"></canvas>
+              <div id="interaction-prompt" class="interaction-prompt hidden">Press E</div>
             </div>
           </div>
 
@@ -126,15 +76,11 @@
               <span class="speaker-tag">Speaker</span>
               <strong id="speaker-name">Narrator</strong>
             </div>
-
-            <div id="dialogue-text" class="dialogue-text">
-              The road waits.
-            </div>
-
+            <div id="dialogue-text" class="dialogue-text">The storm waits.</div>
             <div id="choices-container" class="choices-container"></div>
-
             <div class="dialogue-footer">
-              <span class="footer-note">Choices shape the road ahead.</span>
+              <span class="footer-note">Move: WASD / Arrows · Interact: E</span>
+              <h2 id="scene-title" class="hidden">Blackgrave Cemetery</h2>
             </div>
           </div>
         </div>

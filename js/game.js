@@ -1,104 +1,84 @@
-window.getCurrentScene = function () {
-  if (!window.STORY || !window.gameState) return null;
-  return STORY[gameState.currentScene] || null;
-};
+import { GRAVEYARD_MAP } from "./map.js";
+import { createPlayer, updatePlayer } from "./player.js";
+import { renderScene } from "./render.js";
+import { updateInteraction } from "./interaction.js";
+import { isDialogueOpen } from "./dialogue.js";
+import { gameState } from "./state.js";
 
-window.startNewGame = async function () {
-  if (typeof resetGameState === "function") {
-    resetGameState();
-  } else {
-    gameState.currentScene = "intro";
-  }
-  gameState.currentScene = getValidSceneId(gameState.currentScene);
-  showGameScreen();
-  updateStatsUI();
+export class Game {
+  constructor(canvas, interactionPrompt) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.map = GRAVEYARD_MAP;
+    this.player = createPlayer(gameState.playerPosition.x, gameState.playerPosition.y);
+    this.interactionPrompt = interactionPrompt;
+    this.lastTime = 0;
+    this.running = false;
+    this.currentNearby = null;
+    this.rafId = null;
 
-  if (window.audioSystem && typeof window.audioSystem.startMusic === "function") {
-    window.audioSystem.startMusic();
-  }
-
-  await renderScene();
-};
-
-window.continueGame = async function () {
-  const hadSave = Boolean(localStorage.getItem(SAVE_KEY));
-  loadGame();
-  gameState.currentScene = getValidSceneId(gameState.currentScene);
-  showGameScreen();
-  updateStatsUI();
-
-  if (window.audioSystem && typeof window.audioSystem.startMusic === "function") {
-    window.audioSystem.startMusic();
+    canvas.width = this.map.width;
+    canvas.height = this.map.height;
   }
 
-  await renderScene();
-
-  if (!hadSave) {
-    ui.dialogueText.textContent = "No save was found. A new road has been prepared for you.";
+  start() {
+    this.stop();
+    this.running = true;
+    this.lastTime = performance.now();
+    this.rafId = requestAnimationFrame((time) => this.loop(time));
   }
-};
 
-window.bindCoreButtons = function () {
-  const startBtn = document.getElementById("start-game-btn");
-  const continueBtn = document.getElementById("continue-game-btn");
-  const saveBtn = document.getElementById("save-btn");
-  const loadBtn = document.getElementById("load-btn");
-  const resetBtn = document.getElementById("reset-btn");
-  const musicToggleBtn = document.getElementById("music-toggle-btn");
-  const textSoundToggleBtn = document.getElementById("text-sound-toggle-btn");
-
-  startBtn.addEventListener("click", async () => {
-    await startNewGame();
-  });
-
-  continueBtn.addEventListener("click", async () => {
-    await continueGame();
-  });
-
-  saveBtn.addEventListener("click", () => {
-    saveGame();
-  });
-
-  loadBtn.addEventListener("click", async () => {
-    loadGame();
-    showGameScreen();
-    updateStatsUI();
-    await renderScene();
-  });
-
-  resetBtn.addEventListener("click", async () => {
-    localStorage.removeItem(SAVE_KEY);
-    resetGameState();
-    showTitleScreen();
-    updateStatsUI();
-    await renderScene();
-  });
-
-  musicToggleBtn.addEventListener("click", () => {
-    if (window.audioSystem) {
-      window.audioSystem.toggleMusic();
+  stop() {
+    this.running = false;
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
     }
-  });
+    this.currentNearby = null;
+    this.updatePrompt();
+  }
 
-  textSoundToggleBtn.addEventListener("click", () => {
-    if (window.audioSystem) {
-      window.audioSystem.toggleTextSounds();
+  restorePlayerPosition() {
+    this.player.x = gameState.playerPosition.x;
+    this.player.y = gameState.playerPosition.y;
+  }
+
+  resetPlayerPosition() {
+    this.player.x = this.map.playerStart.x;
+    this.player.y = this.map.playerStart.y;
+    gameState.playerPosition = { x: this.player.x, y: this.player.y };
+  }
+
+  loop(timeMs) {
+    if (!this.running) return;
+
+    const dt = Math.min((timeMs - this.lastTime) / 1000, 0.033);
+    this.lastTime = timeMs;
+
+    updatePlayer(this.player, this.map, dt, !isDialogueOpen());
+    this.currentNearby = updateInteraction(this.player, this.map, () => {
+      this.currentNearby = null;
+      this.updatePrompt();
+    });
+
+    gameState.playerPosition = {
+      x: Math.round(this.player.x),
+      y: Math.round(this.player.y)
+    };
+
+    this.updatePrompt();
+    renderScene(this.ctx, this.map, this.player, this.currentNearby, timeMs);
+
+    this.rafId = requestAnimationFrame((nextTime) => this.loop(nextTime));
+  }
+
+  updatePrompt() {
+    if (!this.interactionPrompt) return;
+    if (this.currentNearby && !isDialogueOpen() && this.running) {
+      this.interactionPrompt.textContent = `Press E — ${this.currentNearby.label}`;
+      this.interactionPrompt.classList.remove("hidden");
+    } else {
+      this.interactionPrompt.classList.add("hidden");
     }
-  });
-};
-
-window.initializeGame = function () {
-  cacheUIElements();
-  bindCoreButtons();
-  if (typeof validateChoiceHandlers === "function") {
-    validateChoiceHandlers();
   }
-
-  if (window.audioSystem && typeof window.audioSystem.init === "function") {
-    window.audioSystem.init();
-  }
-
-  updateStatsUI();
-  showTitleScreen();
-};
-
+}
