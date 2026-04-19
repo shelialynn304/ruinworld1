@@ -1,62 +1,33 @@
-import { setupInput } from "./input.js";
-import { createGame } from "./game.js";
-import { loadGame, resetSave, saveGame } from "./save.js";
-import { npc } from "./npc.js";
+const SCRIPT_ORDER = [
+  "js/state.js",
+  "js/story.js",
+  "js/choices.js",
+  "js/save.js",
+  "js/audio.js",
+  "js/ui.js",
+  "js/game.js"
+];
 
-const canvas = document.getElementById("gameCanvas");
-const dialogueBox = document.getElementById("dialogueBox");
-const dialogueText = document.getElementById("dialogueText");
-const choiceButtons = document.getElementById("choiceButtons");
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.body.appendChild(script);
+  });
+}
 
-const dialogueApi = {
-  show(text, choices) {
-    dialogueText.textContent = text;
-    choiceButtons.innerHTML = "";
-
-    choices.forEach((choice) => {
-      const btn = document.createElement("button");
-      btn.textContent = choice.label;
-      btn.addEventListener("click", choice.action);
-      choiceButtons.appendChild(btn);
-    });
-
-    dialogueBox.classList.remove("hidden");
-  },
-  hide() {
-    dialogueBox.classList.add("hidden");
-    dialogueText.textContent = "";
-    choiceButtons.innerHTML = "";
-  },
-};
-
-setupInput();
-const game = createGame(canvas, dialogueApi);
-
-const saveBtn = document.getElementById("saveBtn");
-const loadBtn = document.getElementById("loadBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-saveBtn.addEventListener("click", () => {
-  saveGame(game.getState());
-  alert("Game saved.");
-});
-
-loadBtn.addEventListener("click", () => {
-  const data = loadGame();
-  if (!data) {
-    alert("No save found.");
-    return;
+async function bootstrap() {
+  for (const src of SCRIPT_ORDER) {
+    await loadScript(src);
   }
 
-  game.setState(data);
-  npc.interacted = Boolean(data.flags?.choseRitual || data.flags?.helpedSeer);
-  dialogueApi.hide();
-  alert("Game loaded.");
-});
+  if (typeof window.initializeGame === "function") {
+    window.initializeGame();
+  }
+}
 
-resetBtn.addEventListener("click", () => {
-  resetSave();
-  game.resetState();
-  dialogueApi.hide();
-  alert("Save reset and state cleared.");
+bootstrap().catch((error) => {
+  console.error("Game bootstrap failed:", error);
 });
