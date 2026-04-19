@@ -102,6 +102,3 @@ window.initializeGame = function () {
   showTitleScreen();
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  initializeGame();
-});
