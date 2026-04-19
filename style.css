@@ -423,3 +423,50 @@ button {
   outline: none;
   border-color: var(--gold);
 }
+
+.canvas-wrap {
+  position: relative;
+  border: 2px solid var(--border);
+  background: #0f1016;
+  width: 100%;
+  max-width: 896px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+#game-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.interaction-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  background: rgba(12, 10, 10, 0.88);
+  border: 2px solid var(--gold);
+  color: #f6e8c7;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}
+
+.close-dialogue-btn {
+  margin-top: 8px;
+}
+
+.small-btn.is-disabled,
+.main-btn.is-disabled,
+.ghost-btn.is-disabled,
+.choice-btn.is-disabled,
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  border-color: var(--border-soft);
+  filter: grayscale(0.35);
+}
