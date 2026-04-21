@@ -21,6 +21,7 @@ export function openDialogue(sceneId, onClose) {
   open = true;
   onCloseCallback = onClose;
 
+  ui.dialoguePanel.classList.remove("hidden");
   ui.speakerName.textContent = scene.speaker;
   ui.sceneTitle.textContent = scene.area;
   ui.dialogueText.textContent = scene.text.join("\n\n");
@@ -48,17 +49,23 @@ export function openDialogue(sceneId, onClose) {
   updateStats(ui);
 }
 
-export function closeDialogue() {
-  if (!open) return;
+export function closeDialogue(options = {}) {
+  const { force = false, suppressCallback = false } = options;
+  if (!open && !force) return;
+
+  const shouldNotify = open && !suppressCallback;
   open = false;
-  if (typeof onCloseCallback === "function") {
+
+  if (shouldNotify && typeof onCloseCallback === "function") {
     onCloseCallback();
   }
   onCloseCallback = null;
+
   if (ui) {
+    ui.dialoguePanel.classList.add("hidden");
     ui.speakerName.textContent = "Narrator";
-    ui.dialogueText.textContent = "Rain and thunder swallow the graveyard once more.";
-    ui.choicesContainer.innerHTML = "<div class=\"footer-note\">Walk to an object and press E to interact.</div>";
+    ui.dialogueText.textContent = "";
+    ui.choicesContainer.innerHTML = "";
     updateStats(ui);
   }
 }
@@ -66,6 +73,7 @@ export function closeDialogue() {
 export function updateStats(uiRef) {
   if (!uiRef) return;
   uiRef.areaLabel.textContent = gameState.currentArea;
+  uiRef.sceneTitle.textContent = gameState.currentArea;
   uiRef.statCorruption.textContent = gameState.corruption;
   uiRef.statMercy.textContent = gameState.mercy;
   uiRef.statInfluence.textContent = gameState.influence;
