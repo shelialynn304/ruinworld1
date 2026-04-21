@@ -2,7 +2,14 @@ import { setupInput } from "./input.js";
 import { Game } from "./game.js";
 import { initDialogue, updateStats, closeDialogue } from "./dialogue.js";
 import { saveGame, loadGame, clearSave, hasSaveData } from "./save.js";
-import { resetState, gameState } from "./state.js";
+import { resetState } from "./state.js";
+
+const INTRO_LINES = [
+  "You wake on wet earth between broken graves, your name split like glass.",
+  "Memory comes in splinters: a bell that never finished ringing, a prayer that turned to ash.",
+  "Stormlight rakes the cemetery. Every thunderclap feels like something searching for you.",
+  "Beyond the headstones, the chapel waits with its door half-open to the dark."
+];
 
 function collectUI() {
   return {
@@ -10,6 +17,7 @@ function collectUI() {
     sceneTitle: document.getElementById("scene-title"),
     speakerName: document.getElementById("speaker-name"),
     dialogueText: document.getElementById("dialogue-text"),
+    dialoguePanel: document.getElementById("dialogue-panel"),
     choicesContainer: document.getElementById("choices-container"),
     relicList: document.getElementById("relic-list"),
     statCorruption: document.getElementById("stat-corruption"),
@@ -23,7 +31,13 @@ function collectUI() {
     statGold: document.getElementById("stat-gold"),
     playerNameLabel: document.getElementById("player-name-label"),
     titleScreen: document.getElementById("title-screen"),
+    introScreen: document.getElementById("intro-screen"),
+    introSequenceText: document.getElementById("intro-sequence-text"),
+    introNextBtn: document.getElementById("intro-next-btn"),
     gameScreen: document.getElementById("game-screen"),
+    statsOverlay: document.getElementById("stats-overlay"),
+    statsToggleBtn: document.getElementById("stats-toggle-btn"),
+    closeStatsBtn: document.getElementById("close-stats-btn"),
     startGameBtn: document.getElementById("start-game-btn"),
     continueGameBtn: document.getElementById("continue-game-btn"),
     saveBtn: document.getElementById("save-btn"),
@@ -31,7 +45,6 @@ function collectUI() {
     resetBtn: document.getElementById("reset-btn"),
     musicToggleBtn: document.getElementById("music-toggle-btn"),
     textSoundToggleBtn: document.getElementById("text-sound-toggle-btn"),
-    introCopy: document.querySelector(".intro-copy"),
     canvas: document.getElementById("game-canvas"),
     interactionPrompt: document.getElementById("interaction-prompt")
   };
@@ -39,31 +52,11 @@ function collectUI() {
 
 function getMissingElements(ui) {
   const required = [
-    "canvas",
-    "interactionPrompt",
-    "titleScreen",
-    "gameScreen",
-    "startGameBtn",
-    "continueGameBtn",
-    "saveBtn",
-    "loadBtn",
-    "resetBtn",
-    "areaLabel",
-    "sceneTitle",
-    "speakerName",
-    "dialogueText",
-    "choicesContainer",
-    "relicList",
-    "playerNameLabel",
-    "statCorruption",
-    "statMercy",
-    "statInfluence",
-    "statDevotion",
-    "statConviction",
-    "statFear",
-    "statDoubt",
-    "statFollowers",
-    "statGold"
+    "canvas", "interactionPrompt", "titleScreen", "introScreen", "gameScreen", "dialoguePanel",
+    "startGameBtn", "continueGameBtn", "saveBtn", "loadBtn", "resetBtn", "introNextBtn",
+    "statsToggleBtn", "closeStatsBtn", "statsOverlay", "areaLabel", "sceneTitle", "speakerName",
+    "dialogueText", "choicesContainer", "relicList", "playerNameLabel", "statCorruption", "statMercy",
+    "statInfluence", "statDevotion", "statConviction", "statFear", "statDoubt", "statFollowers", "statGold"
   ];
 
   return required.filter((name) => !ui[name]);
@@ -76,28 +69,15 @@ if (missing.length > 0) {
   console.error("Game initialization failed. Missing required DOM elements:", missing.join(", "));
 } else {
   const game = new Game(ui.canvas, ui.interactionPrompt);
+  let introIndex = 0;
 
-  function setTitleMessage(message) {
-    if (ui.introCopy) {
-      ui.introCopy.textContent = message;
+  function setScreen(screenName) {
+    ui.titleScreen.classList.toggle("hidden", screenName !== "title");
+    ui.introScreen.classList.toggle("hidden", screenName !== "intro");
+    ui.gameScreen.classList.toggle("hidden", screenName !== "game");
+    if (screenName !== "game") {
+      ui.statsOverlay.classList.add("hidden");
     }
-  }
-
-  function setLiveDialogue(message) {
-    ui.speakerName.textContent = "Narrator";
-    ui.sceneTitle.textContent = gameState.currentArea;
-    ui.dialogueText.textContent = message;
-    ui.choicesContainer.innerHTML = '<div class="footer-note">Approach an object and press E to trigger dialogue and choices.</div>';
-  }
-
-  function showTitle() {
-    ui.titleScreen.classList.remove("hidden");
-    ui.gameScreen.classList.add("hidden");
-  }
-
-  function showGame() {
-    ui.titleScreen.classList.add("hidden");
-    ui.gameScreen.classList.remove("hidden");
   }
 
   function updateContinueButtonState() {
@@ -105,11 +85,12 @@ if (missing.length > 0) {
     ui.continueGameBtn.disabled = !hasSave;
     ui.continueGameBtn.classList.toggle("is-disabled", !hasSave);
     ui.continueGameBtn.title = hasSave ? "Continue from your saved storm" : "No save survives the storm";
+
+    ui.resetBtn.classList.toggle("hidden", !hasSave);
   }
 
   function disableAudioButtons() {
     [ui.musicToggleBtn, ui.textSoundToggleBtn].forEach((btn) => {
-      if (!btn) return;
       btn.disabled = true;
       btn.classList.add("is-disabled");
       btn.title = "Audio controls return in a later build";
@@ -119,18 +100,37 @@ if (missing.length > 0) {
 
   function syncUIAfterStateChange() {
     updateStats(ui);
-    setLiveDialogue("Lightning tears the sky above Blackgrave. Move with WASD or Arrow Keys.");
+  }
+
+  function beginGameplay() {
+    closeDialogue({ force: true, suppressCallback: true });
+    syncUIAfterStateChange();
+    setScreen("game");
+    game.start();
+    updateContinueButtonState();
+  }
+
+  function advanceIntro() {
+    if (introIndex >= INTRO_LINES.length) {
+      beginGameplay();
+      return;
+    }
+
+    ui.introSequenceText.textContent = INTRO_LINES[introIndex];
+    introIndex += 1;
+    ui.introNextBtn.textContent = introIndex >= INTRO_LINES.length ? "Enter the Graveyard" : "Continue";
   }
 
   function startNewGame() {
     game.stop();
     resetState();
     game.resetPlayerPosition();
-    closeDialogue();
+    closeDialogue({ force: true, suppressCallback: true });
     syncUIAfterStateChange();
-    showGame();
-    game.start();
-    updateContinueButtonState();
+
+    introIndex = 0;
+    setScreen("intro");
+    advanceIntro();
   }
 
   function continueGame() {
@@ -138,18 +138,13 @@ if (missing.length > 0) {
     const loaded = loadGame();
 
     if (!loaded) {
-      showTitle();
-      setTitleMessage("No save survives the storm.");
+      setScreen("title");
       updateContinueButtonState();
       return false;
     }
 
     game.restorePlayerPosition();
-    closeDialogue();
-    syncUIAfterStateChange();
-    showGame();
-    game.start();
-    updateContinueButtonState();
+    beginGameplay();
     return true;
   }
 
@@ -158,42 +153,45 @@ if (missing.length > 0) {
     clearSave();
     resetState();
     game.resetPlayerPosition();
-    closeDialogue();
-    updateStats(ui);
-    showTitle();
-    setTitleMessage(
-      "You wake in a storm-soaked graveyard, somewhere between memory and prophecy. Walk the cemetery, touch what should stay buried, and decide what kind of soul survives the night."
-    );
+    closeDialogue({ force: true, suppressCallback: true });
+    syncUIAfterStateChange();
+    setScreen("title");
     updateContinueButtonState();
+  }
+
+  function toggleRecords(forceOpen) {
+    const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : ui.statsOverlay.classList.contains("hidden");
+    ui.statsOverlay.classList.toggle("hidden", !shouldOpen);
+    if (shouldOpen) {
+      updateStats(ui);
+    }
   }
 
   function init() {
     setupInput();
     initDialogue(ui);
     disableAudioButtons();
-    updateStats(ui);
-    showTitle();
+    syncUIAfterStateChange();
+    closeDialogue({ force: true, suppressCallback: true });
+    setScreen("title");
     updateContinueButtonState();
 
     ui.startGameBtn.addEventListener("click", startNewGame);
     ui.continueGameBtn.addEventListener("click", continueGame);
+    ui.introNextBtn.addEventListener("click", advanceIntro);
 
     ui.saveBtn.addEventListener("click", () => {
       saveGame();
       updateContinueButtonState();
-      setLiveDialogue("The storm's memory is sealed in ash and glass.");
-      updateStats(ui);
     });
 
     ui.loadBtn.addEventListener("click", () => {
-      const loaded = continueGame();
-      if (loaded) {
-        setLiveDialogue("Old choices return with the rain.");
-        updateStats(ui);
-      }
+      continueGame();
     });
 
     ui.resetBtn.addEventListener("click", handleReset);
+    ui.statsToggleBtn.addEventListener("click", () => toggleRecords());
+    ui.closeStatsBtn.addEventListener("click", () => toggleRecords(false));
   }
 
   init();
