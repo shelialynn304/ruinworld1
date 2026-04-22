@@ -63,6 +63,10 @@ function drawPlayerSprite(ctx, player) {
     PLAYER_DRAW_SIZE,
     PLAYER_DRAW_SIZE
   );
+
+  if (DEBUG_PLAYER_RENDER) {
+    drawPlayerDebug(ctx, player, metrics);
+  }
 }
 
 export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
