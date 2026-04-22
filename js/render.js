@@ -46,7 +46,7 @@ function drawPlayerSprite(ctx, player) {
     SPRITE_SIZE,
     SPRITE_SIZE,
     Math.round(player.x - 4),
-    Math.round(player.y - 4),
+    Math.round(player.y - 2),
     SPRITE_SIZE,
     SPRITE_SIZE
   );
