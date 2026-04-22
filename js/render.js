@@ -1,4 +1,7 @@
-const SPRITE_SIZE = 32;
+const SPRITE_FRAME_SIZE = 32;
+const PLAYER_DRAW_SCALE = 2;
+const PLAYER_DRAW_SIZE = SPRITE_FRAME_SIZE * PLAYER_DRAW_SCALE;
+const PLAYER_FEET_OFFSET = 2;
 
 const playerSprite = new Image();
 playerSprite.src = "assets/images/spritesheet.png";
@@ -34,37 +37,31 @@ function drawPixelRect(ctx, x, y, w, h, colors) {
 }
 
 function drawPlayerSprite(ctx, player) {
-  if (!playerSprite.complete) return;
+  if (!playerSprite.complete || playerSprite.naturalWidth === 0) return;
 
-  const FRAME_SIZE = 32;
-  const DRAW_SIZE = 64; // 2x scale so the sprite is actually visible
+  // first character occupies the first 3 columns in each direction row
+  const sx = player.spriteFrame * SPRITE_FRAME_SIZE;
 
-  // first character only = first 3 columns, no extra horizontal offset
-  const sx = player.spriteFrame * FRAME_SIZE;
+  // confirmed mapping:
+  // 0 = down, 1 = left, 2 = right, 3 = up
+  const sy = player.spriteDirection * SPRITE_FRAME_SIZE;
 
-  // row mapping you confirmed:
-  // 0 = down (top row)
-  // 1 = left (second row)
-  // 2 = right (third row)
-  // 3 = up (fourth row)
-  const sy = player.spriteDirection * FRAME_SIZE;
+  // Center sprite over collision box on X.
+  const drawX = Math.round(player.x + player.width / 2 - PLAYER_DRAW_SIZE / 2);
 
-  // center on collision box
-  const drawX = Math.round(player.x + player.width / 2 - DRAW_SIZE / 2);
-
-  // anchor sprite lower so the body sits on the ground
-  const drawY = Math.round(player.y + player.height / 2 - DRAW_SIZE / 2);
+  // Ground sprite on collision box bottom with slight upward offset for visual feet alignment.
+  const drawY = Math.round(player.y + player.height - PLAYER_DRAW_SIZE + PLAYER_FEET_OFFSET);
 
   ctx.drawImage(
     playerSprite,
     sx,
     sy,
-    FRAME_SIZE,
-    FRAME_SIZE,
+    SPRITE_FRAME_SIZE,
+    SPRITE_FRAME_SIZE,
     drawX,
     drawY,
-    DRAW_SIZE,
-    DRAW_SIZE
+    PLAYER_DRAW_SIZE,
+    PLAYER_DRAW_SIZE
   );
 }
 
@@ -86,7 +83,6 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
     });
   });
 
-  // 👇 THIS is your real player now
   drawPlayerSprite(ctx, player);
 
   drawRain(ctx, map.width, map.height, timeMs);
