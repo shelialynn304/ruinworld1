@@ -3,6 +3,15 @@ import { collidesWithObstacles } from "./collision.js";
 
 const PLAYER_SIZE = { width: 18, height: 18 };
 const PLAYER_SPEED = 150;
+const ANIMATION_INTERVAL_SECONDS = 0.15;
+const SPRITE_FRAMES_PER_DIRECTION = 3;
+
+const DIRECTION_TO_ROW = {
+  down: 0,
+  left: 1,
+  right: 2,
+  up: 3
+};
 
 export function createPlayer(startX, startY) {
   return {
@@ -13,8 +22,8 @@ export function createPlayer(startX, startY) {
     speed: PLAYER_SPEED,
     facing: "down",
 
-    // sprite animation
-    spriteDirection: 0, // 0=down, 1=left, 2=right, 3=up
+    // sprite animation state
+    spriteDirection: DIRECTION_TO_ROW.down, // 0=down, 1=left, 2=right, 3=up
     spriteFrame: 0,
     moving: false,
     frameTimer: 0
@@ -23,53 +32,62 @@ export function createPlayer(startX, startY) {
 
 export function updatePlayer(player, map, dtSeconds, canMove) {
   if (!canMove) {
-    player.moving = false;
-    player.spriteFrame = 0;
-    player.frameTimer = 0;
+    setIdle(player);
     return;
   }
 
   const move = getMoveVector();
 
   if (move.x === 0 && move.y === 0) {
-    player.moving = false;
-    player.spriteFrame = 0;
-    player.frameTimer = 0;
+    setIdle(player);
     return;
   }
 
   player.moving = true;
+  updateDirection(player, move.x, move.y);
 
   const length = Math.hypot(move.x, move.y) || 1;
   const vx = (move.x / length) * player.speed * dtSeconds;
   const vy = (move.y / length) * player.speed * dtSeconds;
 
-  // Direction based on strongest axis
-  if (Math.abs(move.x) > Math.abs(move.y)) {
-    if (move.x > 0) {
-      player.facing = "right";
-      player.spriteDirection = 2;
-    } else if (move.x < 0) {
-      player.facing = "left";
-      player.spriteDirection = 1;
-    }
-  } else {
-    if (move.y > 0) {
-      player.facing = "down";
-      player.spriteDirection = 0;
-    } else if (move.y < 0) {
-      player.facing = "up";
-      player.spriteDirection = 3;
-    }
-  }
-
   attemptMoveX(player, vx, map);
   attemptMoveY(player, vy, map);
 
   player.frameTimer += dtSeconds;
-  if (player.frameTimer >= 0.15) {
-    player.spriteFrame = (player.spriteFrame + 1) % 3;
-    player.frameTimer = 0;
+  while (player.frameTimer >= ANIMATION_INTERVAL_SECONDS) {
+    player.spriteFrame = (player.spriteFrame + 1) % SPRITE_FRAMES_PER_DIRECTION;
+    player.frameTimer -= ANIMATION_INTERVAL_SECONDS;
+  }
+}
+
+function setIdle(player) {
+  player.moving = false;
+  player.spriteFrame = 0;
+  player.frameTimer = 0;
+}
+
+function updateDirection(player, moveX, moveY) {
+  // Preserve expected behavior: dominant axis picks facing row.
+  if (Math.abs(moveX) > Math.abs(moveY)) {
+    if (moveX > 0) {
+      player.facing = "right";
+      player.spriteDirection = DIRECTION_TO_ROW.right;
+      return;
+    }
+
+    if (moveX < 0) {
+      player.facing = "left";
+      player.spriteDirection = DIRECTION_TO_ROW.left;
+      return;
+    }
+  }
+
+  if (moveY > 0) {
+    player.facing = "down";
+    player.spriteDirection = DIRECTION_TO_ROW.down;
+  } else if (moveY < 0) {
+    player.facing = "up";
+    player.spriteDirection = DIRECTION_TO_ROW.up;
   }
 }
 
