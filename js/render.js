@@ -1,7 +1,7 @@
 const SPRITE_FRAME_SIZE = 32;
 const PLAYER_DRAW_SCALE = 2;
 const PLAYER_DRAW_SIZE = SPRITE_FRAME_SIZE * PLAYER_DRAW_SCALE;
-const PLAYER_FEET_OFFSET = 2;
+const PLAYER_FEET_OFFSET = 6;
 
 const playerSprite = new Image();
 playerSprite.src = "assets/images/spritesheet.png";
