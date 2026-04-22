@@ -44,18 +44,23 @@ export function updatePlayer(player, map, dtSeconds, canMove) {
   const vx = (move.x / length) * player.speed * dtSeconds;
   const vy = (move.y / length) * player.speed * dtSeconds;
 
-  if (move.x > 0) {
-    player.facing = "right";
-    player.spriteDirection = 2;
-  } else if (move.x < 0) {
-    player.facing = "left";
-    player.spriteDirection = 1;
-  } else if (move.y > 0) {
-    player.facing = "down";
-    player.spriteDirection = 0;
-  } else if (move.y < 0) {
-    player.facing = "up";
-    player.spriteDirection = 3;
+  // Direction based on strongest axis
+  if (Math.abs(move.x) > Math.abs(move.y)) {
+    if (move.x > 0) {
+      player.facing = "right";
+      player.spriteDirection = 2;
+    } else if (move.x < 0) {
+      player.facing = "left";
+      player.spriteDirection = 1;
+    }
+  } else {
+    if (move.y > 0) {
+      player.facing = "down";
+      player.spriteDirection = 0;
+    } else if (move.y < 0) {
+      player.facing = "up";
+      player.spriteDirection = 3;
+    }
   }
 
   attemptMoveX(player, vx, map);
