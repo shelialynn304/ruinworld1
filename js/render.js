@@ -36,24 +36,31 @@ function drawPixelRect(ctx, x, y, w, h, colors) {
 function drawPlayerSprite(ctx, player) {
   if (!playerSprite.complete) return;
 
-  const SOURCE_SIZE = 32;
-  const DRAW_SIZE = 64; // scale up 2x so it actually looks visible
+  const FRAME_SIZE = 32;
+  const DRAW_SIZE = 64; // 2x scale so the sprite is actually visible
 
-  const sx = player.spriteFrame * SOURCE_SIZE;
-  const sy = player.spriteDirection * SOURCE_SIZE;
+  // first character only = first 3 columns, no extra horizontal offset
+  const sx = player.spriteFrame * FRAME_SIZE;
 
-  // center sprite on hitbox
+  // row mapping you confirmed:
+  // 0 = down (top row)
+  // 1 = left (second row)
+  // 2 = right (third row)
+  // 3 = up (fourth row)
+  const sy = player.spriteDirection * FRAME_SIZE;
+
+  // center on collision box
   const drawX = Math.round(player.x + player.width / 2 - DRAW_SIZE / 2);
 
-  // feet anchored near bottom of hitbox
-  const drawY = Math.round(player.y + player.height - DRAW_SIZE + 8);
+  // anchor sprite lower so the body sits on the ground
+  const drawY = Math.round(player.y + player.height / 2 - DRAW_SIZE / 2);
 
   ctx.drawImage(
     playerSprite,
     sx,
     sy,
-    SOURCE_SIZE,
-    SOURCE_SIZE,
+    FRAME_SIZE,
+    FRAME_SIZE,
     drawX,
     drawY,
     DRAW_SIZE,
