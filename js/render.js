@@ -36,25 +36,28 @@ function drawPixelRect(ctx, x, y, w, h, colors) {
 function drawPlayerSprite(ctx, player) {
   if (!playerSprite.complete) return;
 
-  const sx = player.spriteFrame * 32;
-  const sy = player.spriteDirection * 32;
+  const SOURCE_SIZE = 32;
+  const DRAW_SIZE = 64; // scale up 2x so it actually looks visible
 
-  // Center horizontally
-  const drawX = Math.round(player.x + player.width / 2 - 16);
+  const sx = player.spriteFrame * SOURCE_SIZE;
+  const sy = player.spriteDirection * SOURCE_SIZE;
 
-  // Align feet to bottom of hitbox
-  const drawY = Math.round(player.y + player.height - 32);
+  // center sprite on hitbox
+  const drawX = Math.round(player.x + player.width / 2 - DRAW_SIZE / 2);
+
+  // feet anchored near bottom of hitbox
+  const drawY = Math.round(player.y + player.height - DRAW_SIZE + 8);
 
   ctx.drawImage(
     playerSprite,
     sx,
     sy,
-    32,
-    32,
+    SOURCE_SIZE,
+    SOURCE_SIZE,
     drawX,
     drawY,
-    32,
-    32
+    DRAW_SIZE,
+    DRAW_SIZE
   );
 }
 
