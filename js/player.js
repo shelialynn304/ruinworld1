@@ -21,9 +21,7 @@ export function createPlayer(startX, startY) {
     height: PLAYER_SIZE.height,
     speed: PLAYER_SPEED,
     facing: "down",
-
-    // sprite animation state
-    spriteDirection: DIRECTION_TO_ROW.down, // 0=down, 1=left, 2=right, 3=up
+    spriteDirection: DIRECTION_TO_ROW.down,
     spriteFrame: 0,
     moving: false,
     frameTimer: 0
@@ -67,7 +65,6 @@ function setIdle(player) {
 }
 
 function updateDirection(player, moveX, moveY) {
-  // Preserve expected behavior: dominant axis picks facing row.
   if (Math.abs(moveX) > Math.abs(moveY)) {
     if (moveX > 0) {
       player.facing = "right";
