@@ -80,21 +80,23 @@ function drawPlayerDebug(ctx, player, metrics) {
 function drawPlayerSprite(ctx, player) {
   if (!playerSprite.complete || playerSprite.naturalWidth === 0) return;
 
- // Manual crop offset inside each 32x32 frame
-const SPRITE_OFFSET_X = 4;
-const SPRITE_OFFSET_Y = 2;
+  // Manual crop offset inside each 32x32 frame
+  const SPRITE_OFFSET_X = 4;
+  const SPRITE_OFFSET_Y = 2;
 
-const sx = (CHARACTER_START_COLUMN + player.spriteFrame) * SPRITE_FRAME_SIZE + SPRITE_OFFSET_X;
-const sy = (CHARACTER_START_ROW + player.spriteDirection) * SPRITE_FRAME_SIZE + SPRITE_OFFSET_Y; 
- 
+  const sx =
+    (CHARACTER_START_COLUMN + player.spriteFrame) * SPRITE_FRAME_SIZE + SPRITE_OFFSET_X;
+  const sy =
+    (CHARACTER_START_ROW + player.spriteDirection) * SPRITE_FRAME_SIZE + SPRITE_OFFSET_Y;
+
   const metrics = getPlayerSpriteDrawMetrics(player);
 
   ctx.drawImage(
     playerSprite,
     sx,
     sy,
-    SPRITE_FRAME_SIZE,
-    SPRITE_FRAME_SIZE,
+    SPRITE_FRAME_SIZE - 8,
+    SPRITE_FRAME_SIZE - 4,
     metrics.drawX,
     metrics.drawY,
     PLAYER_DRAW_SIZE,
