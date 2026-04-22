@@ -39,14 +39,17 @@ function drawPlayerSprite(ctx, player) {
   const sx = player.spriteFrame * SPRITE_SIZE;
   const sy = player.spriteDirection * SPRITE_SIZE;
 
+  const drawX = Math.round(player.x - 7);
+  const drawY = Math.round(player.y - 7);
+
   ctx.drawImage(
     playerSprite,
     sx,
     sy,
     SPRITE_SIZE,
     SPRITE_SIZE,
-    Math.round(player.x - 7),
-    Math.round(player.y - 14),
+    drawX,
+    drawY,
     SPRITE_SIZE,
     SPRITE_SIZE
   );
