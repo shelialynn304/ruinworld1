@@ -11,27 +11,61 @@ export function createPlayer(startX, startY) {
     width: PLAYER_SIZE.width,
     height: PLAYER_SIZE.height,
     speed: PLAYER_SPEED,
-    facing: "down"
+    facing: "down",
+
+    // sprite animation
+    spriteDirection: 0, // 0=down, 1=left, 2=right, 3=up
+    spriteFrame: 0,
+    moving: false,
+    frameTimer: 0
   };
 }
 
 export function updatePlayer(player, map, dtSeconds, canMove) {
-  if (!canMove) return;
+  if (!canMove) {
+    player.moving = false;
+    player.spriteFrame = 0;
+    player.frameTimer = 0;
+    return;
+  }
 
   const move = getMoveVector();
-  if (move.x === 0 && move.y === 0) return;
+
+  if (move.x === 0 && move.y === 0) {
+    player.moving = false;
+    player.spriteFrame = 0;
+    player.frameTimer = 0;
+    return;
+  }
+
+  player.moving = true;
 
   const length = Math.hypot(move.x, move.y) || 1;
   const vx = (move.x / length) * player.speed * dtSeconds;
   const vy = (move.y / length) * player.speed * dtSeconds;
 
-  if (move.x > 0) player.facing = "right";
-  else if (move.x < 0) player.facing = "left";
-  else if (move.y > 0) player.facing = "down";
-  else if (move.y < 0) player.facing = "up";
+  if (move.x > 0) {
+    player.facing = "right";
+    player.spriteDirection = 2;
+  } else if (move.x < 0) {
+    player.facing = "left";
+    player.spriteDirection = 1;
+  } else if (move.y > 0) {
+    player.facing = "down";
+    player.spriteDirection = 0;
+  } else if (move.y < 0) {
+    player.facing = "up";
+    player.spriteDirection = 3;
+  }
 
   attemptMoveX(player, vx, map);
   attemptMoveY(player, vy, map);
+
+  player.frameTimer += dtSeconds;
+  if (player.frameTimer >= 0.15) {
+    player.spriteFrame = (player.spriteFrame + 1) % 3;
+    player.frameTimer = 0;
+  }
 }
 
 function attemptMoveX(player, dx, map) {
