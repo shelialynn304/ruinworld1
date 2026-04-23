@@ -103,22 +103,17 @@ function drawPlayerSprite(ctx, player) {
 }
 
 export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, map.width, map.height);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  ctx.fillStyle = "#11131a";
-  ctx.fillRect(0, 0, map.width, map.height);
+  ctx.fillStyle = "red";
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  ctx.fillStyle = "#1c2320";
-  ctx.fillRect(0, map.height * 0.4, map.width, map.height * 0.6);
-
-  map.obstacles.forEach((obstacle) => {
-    drawPixelRect(ctx, obstacle.x, obstacle.y, obstacle.width, obstacle.height, {
-      base: "#3b3533",
-      shadow: "#26211f",
-      highlight: "#5c5350"
-    });
-  });
+  ctx.fillStyle = "white";
+  ctx.font = "20px monospace";
+  ctx.fillText("RENDER IS RUNNING", 40, 40);
+}
 
   drawPlayerSprite(ctx, player);
   drawRain(ctx, map.width, map.height, timeMs);
