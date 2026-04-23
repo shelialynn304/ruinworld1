@@ -13,85 +13,78 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="game-shell">
-    <main class="scene-panel">
-      <div id="title-screen" class="title-screen">
-        <div class="title-card">
-          <p class="eyebrow">Old roads remember blood.</p>
-          <h1 class="game-title">Branch and Bone</h1>
-          <p class="intro-copy">
-            You wake in a storm-soaked graveyard, somewhere between memory and prophecy.
-            Walk the cemetery, touch what should stay buried, and decide what kind of soul survives the night.
-          </p>
-          <div class="title-actions">
-            <button id="start-game-btn" class="main-btn" type="button">Start New Game</button>
-            <button id="continue-game-btn" class="ghost-btn" type="button">Continue</button>
-          </div>
-          <div class="title-utility">
-            <button id="reset-btn" class="small-btn" type="button">Reset Save</button>
-          </div>
+  <div id="title-screen" class="title-screen">
+    <p class="eyebrow">Old roads remember blood.</p>
+    <h1 class="game-title">Branch and Bone</h1>
+    <p class="intro-copy">
+      You wake in a storm-soaked graveyard, somewhere between memory and prophecy.
+      Walk the cemetery, touch what should stay buried, and decide what kind of soul survives the night.
+    </p>
+    <div class="title-actions">
+      <button id="start-game-btn" class="main-btn" type="button">Start New Game</button>
+      <button id="continue-game-btn" class="ghost-btn" type="button">Continue</button>
+    </div>
+    <div class="title-utility">
+      <button id="reset-btn" class="small-btn" type="button">Reset Save</button>
+    </div>
+  </div>
+
+  <div id="intro-screen" class="intro-screen hidden" aria-live="polite">
+    <p id="intro-sequence-text" class="intro-sequence-text"></p>
+    <button id="intro-next-btn" class="ghost-btn" type="button">Continue</button>
+  </div>
+
+  <div id="gameScreen" class="game-screen hidden">
+    <canvas id="gameCanvas" aria-label="Graveyard map" role="img"></canvas>
+
+    <div id="uiOverlay">
+      <div class="game-hud">
+        <div class="hud-left">
+          <span class="area-label-tag">Area</span>
+          <strong id="area-label">Blackgrave Cemetery</strong>
+        </div>
+        <div class="hud-controls">
+          <button id="stats-toggle-btn" class="small-btn" type="button">Records</button>
+          <button id="music-toggle-btn" class="small-btn" type="button">Music: Off</button>
+          <button id="text-sound-toggle-btn" class="small-btn" type="button">Text Sounds: On</button>
+          <button id="save-btn" class="small-btn" type="button">Save</button>
+          <button id="load-btn" class="small-btn" type="button">Load</button>
         </div>
       </div>
 
-      <div id="intro-screen" class="intro-screen hidden" aria-live="polite">
-        <div class="intro-sequence-card">
-          <p id="intro-sequence-text" class="intro-sequence-text"></p>
-          <button id="intro-next-btn" class="ghost-btn" type="button">Continue</button>
+      <div id="interaction-prompt" class="interaction-prompt hidden">Press E</div>
+
+      <section id="dialogue-panel" class="dialogue-box hidden" aria-live="polite">
+        <div class="speaker-row">
+          <span class="speaker-tag">Speaker</span>
+          <strong id="speaker-name">Narrator</strong>
         </div>
+        <div id="dialogue-text" class="dialogue-text"></div>
+        <div id="choices-container" class="choices-container"></div>
+      </section>
+    </div>
+
+    <aside id="stats-overlay" class="stats-overlay hidden">
+      <div class="stats-panel">
+        <div class="stats-head">
+          <h2 id="player-name-label" class="panel-title">Wanderer</h2>
+          <button id="close-stats-btn" class="ghost-btn" type="button">Close</button>
+        </div>
+        <div class="stat-row"><span>Area</span><strong id="scene-title">Blackgrave Cemetery</strong></div>
+        <div class="stat-row"><span>Corruption</span><strong id="stat-corruption">0</strong></div>
+        <div class="stat-row"><span>Mercy</span><strong id="stat-mercy">0</strong></div>
+        <div class="stat-row"><span>Influence</span><strong id="stat-influence">0</strong></div>
+        <div class="stat-row"><span>Devotion</span><strong id="stat-devotion">0</strong></div>
+        <div class="stat-row"><span>Conviction</span><strong id="stat-conviction">0</strong></div>
+        <div class="stat-row"><span>Fear</span><strong id="stat-fear">0</strong></div>
+        <div class="stat-row"><span>Doubt</span><strong id="stat-doubt">0</strong></div>
+        <div class="stat-row"><span>Followers</span><strong id="stat-followers">0</strong></div>
+        <div class="stat-row"><span>Gold</span><strong id="stat-gold">0</strong></div>
+        <div class="panel-divider"></div>
+        <h3 class="mini-title">Relics</h3>
+        <ul id="relic-list" class="relic-list"><li>None</li></ul>
       </div>
-
-      <div id="game-screen" class="game-screen hidden">
-        <div class="game-hud">
-          <div class="hud-left">
-            <span class="area-label-tag">Area</span>
-            <strong id="area-label">Blackgrave Cemetery</strong>
-          </div>
-          <div class="hud-controls">
-            <button id="stats-toggle-btn" class="small-btn" type="button">Records</button>
-            <button id="music-toggle-btn" class="small-btn" type="button">Music: Off</button>
-            <button id="text-sound-toggle-btn" class="small-btn" type="button">Text Sounds: On</button>
-            <button id="save-btn" class="small-btn" type="button">Save</button>
-            <button id="load-btn" class="small-btn" type="button">Load</button>
-          </div>
-        </div>
-
-        <div class="canvas-wrap">
-          <canvas id="game-canvas" aria-label="Graveyard map" role="img"></canvas>
-          <div id="interaction-prompt" class="interaction-prompt hidden">Press E</div>
-
-          <section id="dialogue-panel" class="dialogue-box hidden" aria-live="polite">
-            <div class="speaker-row">
-              <span class="speaker-tag">Speaker</span>
-              <strong id="speaker-name">Narrator</strong>
-            </div>
-            <div id="dialogue-text" class="dialogue-text"></div>
-            <div id="choices-container" class="choices-container"></div>
-          </section>
-        </div>
-      </div>
-
-      <aside id="stats-overlay" class="stats-overlay hidden">
-        <div class="stats-panel">
-          <div class="stats-head">
-            <h2 id="player-name-label" class="panel-title">Wanderer</h2>
-            <button id="close-stats-btn" class="ghost-btn" type="button">Close</button>
-          </div>
-          <div class="stat-row"><span>Area</span><strong id="scene-title">Blackgrave Cemetery</strong></div>
-          <div class="stat-row"><span>Corruption</span><strong id="stat-corruption">0</strong></div>
-          <div class="stat-row"><span>Mercy</span><strong id="stat-mercy">0</strong></div>
-          <div class="stat-row"><span>Influence</span><strong id="stat-influence">0</strong></div>
-          <div class="stat-row"><span>Devotion</span><strong id="stat-devotion">0</strong></div>
-          <div class="stat-row"><span>Conviction</span><strong id="stat-conviction">0</strong></div>
-          <div class="stat-row"><span>Fear</span><strong id="stat-fear">0</strong></div>
-          <div class="stat-row"><span>Doubt</span><strong id="stat-doubt">0</strong></div>
-          <div class="stat-row"><span>Followers</span><strong id="stat-followers">0</strong></div>
-          <div class="stat-row"><span>Gold</span><strong id="stat-gold">0</strong></div>
-          <div class="panel-divider"></div>
-          <h3 class="mini-title">Relics</h3>
-          <ul id="relic-list" class="relic-list"><li>None</li></ul>
-        </div>
-      </aside>
-    </main>
+    </aside>
   </div>
 
   <script type="module" src="js/main.js"></script>
