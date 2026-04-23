@@ -72,19 +72,13 @@ button {
 .title-screen,
 .intro-screen {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 16px;
   padding: 28px;
-  background: radial-gradient(circle at top, rgba(120, 70, 40, 0.08), transparent 30%), #090807;
-}
-
-.title-card,
-.intro-sequence-card {
-  width: min(760px, 100%);
-  padding: 34px;
-  border: 2px solid var(--border);
-  background: linear-gradient(180deg, rgba(23, 20, 18, 0.96), rgba(14, 12, 10, 0.97));
   text-align: center;
+  background: radial-gradient(circle at top, rgba(120, 70, 40, 0.08), transparent 30%), #090807;
 }
 
 .eyebrow {
@@ -104,7 +98,8 @@ button {
 }
 
 .intro-copy {
-  margin: 18px auto 0;
+  max-width: 760px;
+  margin: 18px 0 0;
   line-height: 1.8;
 }
 
@@ -124,6 +119,7 @@ button {
 
 .intro-sequence-text {
   min-height: 120px;
+  max-width: 760px;
   margin: 0 0 22px;
   color: #ece1cf;
   font-size: 1.3rem;

@@ -110,7 +110,6 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
   ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
 
   ctx.fillStyle = "#11131a";
@@ -157,4 +156,6 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
       nearbyInteractable.height + 4
     );
   }
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
