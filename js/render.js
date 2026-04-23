@@ -9,7 +9,7 @@ const CHARACTER_START_ROW = 0;
 const DEBUG_PLAYER_RENDER = true;
 
 const playerSprite = new Image();
-playerSprite.src = "assets/images/spritesheet.png";
+playerSprite.src = "assets/images/rogues.png";
 
 function drawRain(ctx, width, height, timeMs) {
   ctx.strokeStyle = "rgba(180, 190, 220, 0.22)";
@@ -80,30 +80,38 @@ function drawPlayerDebug(ctx, player, metrics) {
 function drawPlayerSprite(ctx, player) {
   if (!playerSprite.complete || playerSprite.naturalWidth === 0) return;
 
-  // Manual crop offset inside each 32x32 frame
-  const SPRITE_OFFSET_X = 4;
-  const SPRITE_OFFSET_Y = 2;
+  const SPRITE_SIZE = 32;
+  const DRAW_SIZE = 64;
 
-  const sx =
-    (CHARACTER_START_COLUMN + player.spriteFrame) * SPRITE_FRAME_SIZE + SPRITE_OFFSET_X;
-  const sy =
-    (CHARACTER_START_ROW + player.spriteDirection) * SPRITE_FRAME_SIZE + SPRITE_OFFSET_Y;
+  // 👇 CHANGE THESE to pick your character
+  const CHAR_COL = 1; // 0 = first column
+  const CHAR_ROW = 0; // 0 = top row
 
-  const metrics = getPlayerSpriteDrawMetrics(player);
+  const sx = CHAR_COL * SPRITE_SIZE;
+  const sy = CHAR_ROW * SPRITE_SIZE;
+
+  const drawX = Math.round(player.x + player.width / 2 - DRAW_SIZE / 2);
+  const drawY = Math.round(player.y + player.height - DRAW_SIZE + 6);
 
   ctx.drawImage(
     playerSprite,
     sx,
     sy,
-    SPRITE_FRAME_SIZE - 8,
-    SPRITE_FRAME_SIZE - 4,
-    metrics.drawX,
-    metrics.drawY,
-    PLAYER_DRAW_SIZE,
-    PLAYER_DRAW_SIZE
+    SPRITE_SIZE,
+    SPRITE_SIZE,
+    drawX,
+    drawY,
+    DRAW_SIZE,
+    DRAW_SIZE
   );
 
   if (DEBUG_PLAYER_RENDER) {
+    const metrics = {
+      drawX,
+      drawY,
+      feetX: Math.round(player.x + player.width / 2),
+      feetY: Math.round(player.y + player.height)
+    };
     drawPlayerDebug(ctx, player, metrics);
   }
 }
