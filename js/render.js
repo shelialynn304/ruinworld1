@@ -117,8 +117,15 @@ function drawPlayerSprite(ctx, player) {
 }
 
 export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
+  const canvasWidth = ctx.canvas.width;
+  const canvasHeight = ctx.canvas.height;
+  const scaleX = canvasWidth / map.width;
+  const scaleY = canvasHeight / map.height;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, map.width, map.height);
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
 
   ctx.fillStyle = "#11131a";
   ctx.fillRect(0, 0, map.width, map.height);
@@ -148,4 +155,6 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
       nearbyInteractable.height + 4
     );
   }
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
