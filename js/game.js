@@ -17,8 +17,6 @@ export class Game {
     this.currentNearby = null;
     this.rafId = null;
 
-    canvas.width = this.map.width;
-    canvas.height = this.map.height;
   }
 
   start() {
