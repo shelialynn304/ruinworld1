@@ -6,7 +6,7 @@ const PLAYER_FEET_OFFSET = 6;
 const CHARACTER_START_COLUMN = 3;
 const CHARACTER_START_ROW = 0;
 
-const DEBUG_PLAYER_RENDER = true;
+const DEBUG_PLAYER_RENDER = false;
 
 const playerSprite = new Image();
 playerSprite.src = "assets/images/rogues.png";
