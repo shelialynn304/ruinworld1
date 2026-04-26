@@ -34,7 +34,7 @@ function collectUI() {
     introScreen: document.getElementById("intro-screen"),
     introSequenceText: document.getElementById("intro-sequence-text"),
     introNextBtn: document.getElementById("intro-next-btn"),
-    gameScreen: document.getElementById("game-screen"),
+    gameScreen: document.getElementById("gameScreen"),
     statsOverlay: document.getElementById("stats-overlay"),
     statsToggleBtn: document.getElementById("stats-toggle-btn"),
     closeStatsBtn: document.getElementById("close-stats-btn"),
@@ -45,7 +45,7 @@ function collectUI() {
     resetBtn: document.getElementById("reset-btn"),
     musicToggleBtn: document.getElementById("music-toggle-btn"),
     textSoundToggleBtn: document.getElementById("text-sound-toggle-btn"),
-    canvas: document.getElementById("game-canvas"),
+    canvas: document.getElementById("gameCanvas"),
     interactionPrompt: document.getElementById("interaction-prompt")
   };
 }
@@ -70,6 +70,15 @@ if (missing.length > 0) {
 } else {
   const game = new Game(ui.canvas, ui.interactionPrompt);
   let introIndex = 0;
+
+  function resizeCanvas() {
+    const canvas = document.getElementById("gameCanvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
 
   function setScreen(screenName) {
     ui.titleScreen.classList.toggle("hidden", screenName !== "title");
@@ -103,6 +112,7 @@ if (missing.length > 0) {
   }
 
   function beginGameplay() {
+    document.body.requestFullscreen?.().catch(() => {});
     closeDialogue({ force: true, suppressCallback: true });
     syncUIAfterStateChange();
     setScreen("game");

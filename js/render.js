@@ -25,8 +25,15 @@ function drawPixelRect(ctx, x, y, w, h, colors) {
 }
 
 export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
+  const canvasWidth = ctx.canvas.width;
+  const canvasHeight = ctx.canvas.height;
+  const scaleX = canvasWidth / map.width;
+  const scaleY = canvasHeight / map.height;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, map.width, map.height);
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
 
   ctx.fillStyle = "#11131a";
   ctx.fillRect(0, 0, map.width, map.height);
@@ -68,29 +75,42 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
     }
   });
 
+  drawRain(ctx, map.width, map.height, timeMs);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  const playerX = Math.round(player.x * scaleX);
+  const playerY = Math.round(player.y * scaleY);
+  const playerW = Math.max(2, Math.round(player.width * scaleX));
+  const playerH = Math.max(2, Math.round(player.height * scaleY));
+
   // Player placeholder sprite.
-  drawPixelRect(ctx, player.x, player.y, player.width, player.height, {
+  drawPixelRect(ctx, playerX, playerY, playerW, playerH, {
     base: "#d5d0c7",
     shadow: "#8b332f",
     highlight: "#f0ede7"
   });
 
-  ctx.fillStyle = "#20150f";
-  if (player.facing === "up") ctx.fillRect(player.x + 7, player.y + 1, 4, 3);
-  else if (player.facing === "down") ctx.fillRect(player.x + 7, player.y + 14, 4, 3);
-  else if (player.facing === "left") ctx.fillRect(player.x + 1, player.y + 8, 3, 4);
-  else ctx.fillRect(player.x + 14, player.y + 8, 3, 4);
+  const eyeOffsetX = Math.max(1, Math.round((7 / player.width) * playerW));
+  const eyeOffsetY = Math.max(1, Math.round((8 / player.height) * playerH));
+  const eyeW = Math.max(1, Math.round((4 / player.width) * playerW));
+  const eyeH = Math.max(1, Math.round((3 / player.height) * playerH));
 
-  drawRain(ctx, map.width, map.height, timeMs);
+  ctx.fillStyle = "#20150f";
+  if (player.facing === "up") ctx.fillRect(playerX + eyeOffsetX, playerY + 1, eyeW, eyeH);
+  else if (player.facing === "down") ctx.fillRect(playerX + eyeOffsetX, playerY + playerH - eyeH - 1, eyeW, eyeH);
+  else if (player.facing === "left") ctx.fillRect(playerX + 1, playerY + eyeOffsetY, eyeH, eyeW);
+  else ctx.fillRect(playerX + playerW - eyeH - 1, playerY + eyeOffsetY, eyeH, eyeW);
 
   if (nearbyInteractable) {
     ctx.strokeStyle = "rgba(222, 204, 145, 0.7)";
     ctx.lineWidth = 1;
     ctx.strokeRect(
-      nearbyInteractable.x - 2,
-      nearbyInteractable.y - 2,
-      nearbyInteractable.width + 4,
-      nearbyInteractable.height + 4
+      Math.round((nearbyInteractable.x - 2) * scaleX),
+      Math.round((nearbyInteractable.y - 2) * scaleY),
+      Math.round((nearbyInteractable.width + 4) * scaleX),
+      Math.round((nearbyInteractable.height + 4) * scaleY)
     );
   }
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }

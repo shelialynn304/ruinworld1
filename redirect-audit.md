@@ -1,16 +1,16 @@
 # Redirect Audit
 
-Preferred canonical domain: `https://edgeoverluck.com`
+Preferred canonical domain: `https://ruinworld-branchandbone.com`
 
 | Old URL pattern | Preferred destination | Reason |
 |---|---|---|
-| `http://edgeoverluck.com/` | `https://edgeoverluck.com/` | Force HTTPS for canonical consistency. |
-| `http://edgeoverluck.com/index.html` | `https://edgeoverluck.com/` | Remove duplicate homepage variant and force HTTPS. |
-| `https://www.edgeoverluck.com/` | `https://edgeoverluck.com/` | Consolidate `www` to preferred non-`www` host. |
-| `https://www.edgeoverluck.com/index.html` | `https://edgeoverluck.com/` | Consolidate `www` + remove duplicate homepage variant. |
-| `https://edgeoverluck.com/index.html` | `https://edgeoverluck.com/` | Canonical homepage should resolve to clean root URL. |
-| `http://www.edgeoverluck.com/` | `https://edgeoverluck.com/` | Consolidate protocol + host duplication in one redirect. |
-| `http://www.edgeoverluck.com/index.html` | `https://edgeoverluck.com/` | Consolidate protocol + host + duplicate homepage path. |
+| `http://ruinworld-branchandbone.com/` | `https://ruinworld-branchandbone.com/` | Force HTTPS for canonical consistency. |
+| `http://ruinworld-branchandbone.com/index.html` | `https://ruinworld-branchandbone.com/` | Remove duplicate homepage variant and force HTTPS. |
+| `https://www.ruinworld-branchandbone.com/` | `https://ruinworld-branchandbone.com/` | Consolidate `www` to preferred non-`www` host. |
+| `https://www.ruinworld-branchandbone.com/index.html` | `https://ruinworld-branchandbone.com/` | Consolidate `www` + remove duplicate homepage variant. |
+| `https://ruinworld-branchandbone.com/index.html` | `https://ruinworld-branchandbone.com/` | Canonical homepage should resolve to clean root URL. |
+| `http://www.ruinworld-branchandbone.com/` | `https://ruinworld-branchandbone.com/` | Consolidate protocol + host duplication in one redirect. |
+| `http://www.ruinworld-branchandbone.com/index.html` | `https://ruinworld-branchandbone.com/` | Consolidate protocol + host + duplicate homepage path. |
 
 ## Notes
 

@@ -40,7 +40,7 @@ window.cacheUIElements = function () {
   ui.playerNameLabel = document.getElementById("player-name-label");
 
   ui.titleScreen = document.getElementById("title-screen");
-  ui.gameScreen = document.getElementById("game-screen");
+  ui.gameScreen = document.getElementById("gameScreen");
 };
 
 window.showTitleScreen = function () {
