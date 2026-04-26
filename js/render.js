@@ -67,7 +67,7 @@ function drawGround(ctx, map) {
       drawTile(ctx, baseTile, x, y, TILE_SIZE);
 
       const detailChance = tileNoise(col, row, 2);
-      if (detailChance > 0.86) {
+      if (detailChance > 0.94) {
         const detailIndex = Math.floor(tileNoise(col, row, 3) * DETAIL_TILES.length);
         const detailTile = DETAIL_TILES[detailIndex];
         drawTile(ctx, detailTile, x, y, TILE_SIZE);
