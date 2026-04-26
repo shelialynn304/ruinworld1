@@ -101,6 +101,7 @@ function drawPlayerSprite(ctx, player) {
     drawPlayerDebug(ctx, player, metrics);
   }
 }
+
 export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
   const canvasWidth = ctx.canvas.width;
   const canvasHeight = ctx.canvas.height;
@@ -110,6 +111,7 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
   ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
 
   ctx.fillStyle = "#11131a";
@@ -125,38 +127,6 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
       highlight: "#5c5350"
     });
   });
-
-  const playerX = Math.round(player.x);
-  const playerY = Math.round(player.y);
-
-  // Player placeholder sprite.
-  drawPixelRect(ctx, playerX, playerY, player.width, player.height, {
-    base: "#d5d0c7",
-    shadow: "#8b332f",
-    highlight: "#f0ede7"
-  });
-
-  ctx.fillStyle = "#20150f";
-  if (player.facing === "up") ctx.fillRect(playerX + 7, playerY + 1, 4, 3);
-  else if (player.facing === "down") ctx.fillRect(playerX + 7, playerY + 14, 4, 3);
-  else if (player.facing === "left") ctx.fillRect(playerX + 1, playerY + 8, 3, 4);
-  else ctx.fillRect(playerX + 14, playerY + 8, 3, 4);
-  drawPlayerSprite(ctx, player);
-  drawRain(ctx, map.width, map.height, timeMs);
-
-  if (nearbyInteractable) {
-    ctx.strokeStyle = "rgba(222, 204, 145, 0.7)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(
-      nearbyInteractable.x - 2,
-      nearbyInteractable.y - 2,
-      nearbyInteractable.width + 4,
-      nearbyInteractable.height + 4
-    );
-  }
-
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-
 
   drawPlayerSprite(ctx, player);
   drawRain(ctx, map.width, map.height, timeMs);
