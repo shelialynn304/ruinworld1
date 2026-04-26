@@ -7,9 +7,77 @@ const CHARACTER_START_COLUMN = 3;
 const CHARACTER_START_ROW = 0;
 
 const DEBUG_PLAYER_RENDER = false;
+const TILE_SIZE = 32;
+const GROUND_START_RATIO = 0.4;
 
 const playerSprite = new Image();
 playerSprite.src = "assets/images/rogues.png";
+
+const tileSprite = new Image();
+tileSprite.src = "assets/images/tiles.png";
+
+const GROUND_TILES = [
+  { col: 0, row: 11 },
+  { col: 1, row: 11 },
+  { col: 2, row: 11 },
+  { col: 0, row: 12 }
+];
+
+const DETAIL_TILES = [
+  { col: 5, row: 15 },
+  { col: 6, row: 15 },
+  { col: 7, row: 15 },
+  { col: 0, row: 10 },
+  { col: 1, row: 10 }
+];
+
+function tileNoise(x, y, seed = 0) {
+  const n = Math.sin((x * 12.9898 + y * 78.233 + seed * 37.719) * 0.053);
+  return n - Math.floor(n);
+}
+
+function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
+  if (!tileSprite.complete || tileSprite.naturalWidth === 0) return false;
+
+  const sx = tile.col * TILE_SIZE;
+  const sy = tile.row * TILE_SIZE;
+  ctx.drawImage(tileSprite, sx, sy, TILE_SIZE, TILE_SIZE, dx, dy, size, size);
+  return true;
+}
+
+function drawGround(ctx, map) {
+  const groundStartY = Math.floor(map.height * GROUND_START_RATIO);
+  const groundHeight = map.height - groundStartY;
+
+  ctx.fillStyle = "#1c2320";
+  ctx.fillRect(0, groundStartY, map.width, groundHeight);
+
+  if (!tileSprite.complete || tileSprite.naturalWidth === 0) return;
+
+  const cols = Math.ceil(map.width / TILE_SIZE);
+  const rows = Math.ceil(groundHeight / TILE_SIZE);
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const x = col * TILE_SIZE;
+      const y = groundStartY + row * TILE_SIZE;
+
+      const baseIndex = Math.floor(tileNoise(col, row, 1) * GROUND_TILES.length);
+      const baseTile = GROUND_TILES[baseIndex];
+      drawTile(ctx, baseTile, x, y, TILE_SIZE);
+
+      const detailChance = tileNoise(col, row, 2);
+      if (detailChance > 0.86) {
+        const detailIndex = Math.floor(tileNoise(col, row, 3) * DETAIL_TILES.length);
+        const detailTile = DETAIL_TILES[detailIndex];
+        drawTile(ctx, detailTile, x, y, TILE_SIZE);
+      }
+    }
+  }
+
+  ctx.fillStyle = "rgba(10, 12, 16, 0.24)";
+  ctx.fillRect(0, groundStartY, map.width, groundHeight);
+}
 
 function drawRain(ctx, width, height, timeMs) {
   ctx.strokeStyle = "rgba(180, 190, 220, 0.22)";
@@ -117,8 +185,7 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
   ctx.fillStyle = "#11131a";
   ctx.fillRect(0, 0, map.width, map.height);
 
-  ctx.fillStyle = "#1c2320";
-  ctx.fillRect(0, map.height * 0.4, map.width, map.height * 0.6);
+  drawGround(ctx, map);
 
   map.obstacles.forEach((obstacle) => {
     drawPixelRect(ctx, obstacle.x, obstacle.y, obstacle.width, obstacle.height, {
