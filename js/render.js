@@ -126,6 +126,21 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
     });
   });
 
+  const playerX = Math.round(player.x);
+  const playerY = Math.round(player.y);
+
+  // Player placeholder sprite.
+  drawPixelRect(ctx, playerX, playerY, player.width, player.height, {
+    base: "#d5d0c7",
+    shadow: "#8b332f",
+    highlight: "#f0ede7"
+  });
+
+  ctx.fillStyle = "#20150f";
+  if (player.facing === "up") ctx.fillRect(playerX + 7, playerY + 1, 4, 3);
+  else if (player.facing === "down") ctx.fillRect(playerX + 7, playerY + 14, 4, 3);
+  else if (player.facing === "left") ctx.fillRect(playerX + 1, playerY + 8, 3, 4);
+  else ctx.fillRect(playerX + 14, playerY + 8, 3, 4);
   drawPlayerSprite(ctx, player);
   drawRain(ctx, map.width, map.height, timeMs);
 
