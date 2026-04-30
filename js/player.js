@@ -1,7 +1,12 @@
 import { getMoveVector } from "./input.js";
 import { collidesWithObstacles } from "./collision.js";
 
-const PLAYER_SIZE = { width: 18, height: 18 };
+const PLAYER_SIZE = { width: 32, height: 32 };
+
+export const PLAYER_COLLISION_WIDTH = 18;
+export const PLAYER_COLLISION_HEIGHT = 14;
+export const PLAYER_COLLISION_OFFSET_X = 7;
+export const PLAYER_COLLISION_OFFSET_Y = 18;
 const PLAYER_SPEED = 150;
 const ANIMATION_INTERVAL_SECONDS = 0.15;
 const SPRITE_FRAMES_PER_DIRECTION = 3;
@@ -24,7 +29,11 @@ export function createPlayer(startX, startY) {
     spriteDirection: DIRECTION_TO_ROW.down,
     spriteFrame: 0,
     moving: false,
-    frameTimer: 0
+    frameTimer: 0,
+    collisionWidth: PLAYER_COLLISION_WIDTH,
+    collisionHeight: PLAYER_COLLISION_HEIGHT,
+    collisionOffsetX: PLAYER_COLLISION_OFFSET_X,
+    collisionOffsetY: PLAYER_COLLISION_OFFSET_Y
   };
 }
 
@@ -91,30 +100,22 @@ function updateDirection(player, moveX, moveY) {
 function attemptMoveX(player, dx, map) {
   if (dx === 0) return;
 
-  const next = {
-    x: player.x + dx,
-    y: player.y,
-    width: player.width,
-    height: player.height
-  };
+  const nextX = player.x + dx;
+  const nextCollision = getPlayerCollisionRect(player, nextX, player.y);
 
-  if (!isOutOfBounds(next, map) && !collidesWithObstacles(next, map.obstacles)) {
-    player.x = next.x;
+  if (!isOutOfBounds(nextCollision, map) && !collidesWithObstacles(nextCollision, map.obstacles)) {
+    player.x = nextX;
   }
 }
 
 function attemptMoveY(player, dy, map) {
   if (dy === 0) return;
 
-  const next = {
-    x: player.x,
-    y: player.y + dy,
-    width: player.width,
-    height: player.height
-  };
+  const nextY = player.y + dy;
+  const nextCollision = getPlayerCollisionRect(player, player.x, nextY);
 
-  if (!isOutOfBounds(next, map) && !collidesWithObstacles(next, map.obstacles)) {
-    player.y = next.y;
+  if (!isOutOfBounds(nextCollision, map) && !collidesWithObstacles(nextCollision, map.obstacles)) {
+    player.y = nextY;
   }
 }
 
@@ -125,4 +126,22 @@ function isOutOfBounds(rect, map) {
     rect.x + rect.width > map.width ||
     rect.y + rect.height > map.height
   );
+}
+
+
+export function getPlayerCollisionRect(player, x = player.x, y = player.y) {
+  return {
+    x: x + player.collisionOffsetX,
+    y: y + player.collisionOffsetY,
+    width: player.collisionWidth,
+    height: player.collisionHeight
+  };
+}
+
+export function getPlayerFeetPosition(player) {
+  const collision = getPlayerCollisionRect(player);
+  return {
+    x: collision.x + collision.width / 2,
+    y: collision.y + collision.height
+  };
 }
