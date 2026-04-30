@@ -1,3 +1,5 @@
+import { getPlayerCollisionRect } from "./player.js";
+
 const SPRITE_FRAME_SIZE = 32;
 const PLAYER_DRAW_SCALE = 2;
 const PLAYER_DRAW_SIZE = SPRITE_FRAME_SIZE * PLAYER_DRAW_SCALE;
@@ -16,20 +18,12 @@ playerSprite.src = "assets/images/rogues.png";
 const tileSprite = new Image();
 tileSprite.src = "assets/images/tiles.png";
 
-const GROUND_TILES = [
-  { col: 0, row: 11 },
-  { col: 1, row: 11 },
-  { col: 2, row: 11 },
-  { col: 0, row: 12 }
-];
-
-const DETAIL_TILES = [
-  { col: 5, row: 15 },
-  { col: 6, row: 15 },
-  { col: 7, row: 15 },
-  { col: 0, row: 10 },
-  { col: 1, row: 10 }
-];
+const GROUND_BASE_TILE = { col: 1, row: 11 };
+const GROUND_VARIANTS = [{ col: 0, row: 11 }, { col: 2, row: 11 }, { col: 0, row: 12 }];
+const PATH_TILE = { col: 0, row: 10 };
+const CRACK_TILE = { col: 6, row: 15 };
+const WEED_TILE = { col: 7, row: 15 };
+const PUDDLE_TILE = { col: 5, row: 15 };
 
 function tileNoise(x, y, seed = 0) {
   const n = Math.sin((x * 12.9898 + y * 78.233 + seed * 37.719) * 0.053);
@@ -38,55 +32,56 @@ function tileNoise(x, y, seed = 0) {
 
 function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
   if (!tileSprite.complete || tileSprite.naturalWidth === 0) return false;
-
-  const sx = tile.col * TILE_SIZE;
-  const sy = tile.row * TILE_SIZE;
-  ctx.drawImage(tileSprite, sx, sy, TILE_SIZE, TILE_SIZE, dx, dy, size, size);
+  ctx.drawImage(tileSprite, tile.col * TILE_SIZE, tile.row * TILE_SIZE, TILE_SIZE, TILE_SIZE, dx, dy, size, size);
   return true;
+}
+
+function isPathTile(col, row) {
+  const center = 7;
+  const rowBand = row > 1 && row < 7;
+  return rowBand && (Math.abs(col - center) <= 1 || (row > 4 && col > 8 && col < 13));
+}
+
+function isPlotTile(col, row) {
+  const plotRows = [2, 4, 6, 8];
+  return plotRows.includes(row) && col >= 2 && col <= 15 && col % 2 === 0;
 }
 
 function drawGround(ctx, map) {
   const groundStartY = Math.floor(map.height * GROUND_START_RATIO);
   const groundHeight = map.height - groundStartY;
-
-  ctx.fillStyle = "#1c2320";
-  ctx.fillRect(0, groundStartY, map.width, groundHeight);
-
-  if (!tileSprite.complete || tileSprite.naturalWidth === 0) return;
-
   const cols = Math.ceil(map.width / TILE_SIZE);
   const rows = Math.ceil(groundHeight / TILE_SIZE);
+
+  ctx.fillStyle = "#1b201d";
+  ctx.fillRect(0, groundStartY, map.width, groundHeight);
 
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < cols; col += 1) {
       const x = col * TILE_SIZE;
       const y = groundStartY + row * TILE_SIZE;
+      drawTile(ctx, GROUND_BASE_TILE, x, y);
 
-      const baseIndex = Math.floor(tileNoise(col, row, 1) * GROUND_TILES.length);
-      const baseTile = GROUND_TILES[baseIndex];
-      drawTile(ctx, baseTile, x, y, TILE_SIZE);
-
-      const detailChance = tileNoise(col, row, 2);
-      if (detailChance > 0.94) {
-        const detailIndex = Math.floor(tileNoise(col, row, 3) * DETAIL_TILES.length);
-        const detailTile = DETAIL_TILES[detailIndex];
-        drawTile(ctx, detailTile, x, y, TILE_SIZE);
+      if (tileNoise(col, row, 4) > 0.9) {
+        drawTile(ctx, GROUND_VARIANTS[Math.floor(tileNoise(col, row, 8) * GROUND_VARIANTS.length)], x, y);
       }
+      if (isPathTile(col, row)) drawTile(ctx, PATH_TILE, x, y);
+      if (isPlotTile(col, row) && tileNoise(col, row, 5) > 0.35) drawTile(ctx, CRACK_TILE, x, y);
+      if (tileNoise(col, row, 6) > 0.95) drawTile(ctx, WEED_TILE, x, y);
+      if (row > 5 && tileNoise(col, row, 7) > 0.975) drawTile(ctx, PUDDLE_TILE, x, y);
     }
   }
 
-  ctx.fillStyle = "rgba(10, 12, 16, 0.24)";
+  ctx.fillStyle = "rgba(10, 12, 16, 0.28)";
   ctx.fillRect(0, groundStartY, map.width, groundHeight);
 }
 
 function drawRain(ctx, width, height, timeMs) {
   ctx.strokeStyle = "rgba(180, 190, 220, 0.22)";
   ctx.lineWidth = 1;
-
   for (let i = 0; i < 70; i += 1) {
     const x = (i * 17 + timeMs * 0.12) % width;
     const y = (i * 37 + timeMs * 0.24) % height;
-
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x - 4, y + 12);
@@ -94,79 +89,47 @@ function drawRain(ctx, width, height, timeMs) {
   }
 }
 
-function drawPixelRect(ctx, x, y, w, h, colors) {
+function drawObstacle(ctx, obstacle) {
+  const palette = {
+    grave_plot: { base: "#2c2a28", shadow: "#1f1d1b", highlight: "#3a3532" },
+    headstone: { base: "#4a4643", shadow: "#2b2826", highlight: "#615a56" },
+    broken_stone: { base: "#3b3735", shadow: "#242120", highlight: "#55504c" },
+    fence: { base: "#40352f", shadow: "#2a221e", highlight: "#564840" },
+    chapel: { base: "#352f33", shadow: "#221f24", highlight: "#48424a" },
+    statue: { base: "#4b4742", shadow: "#2d2a27", highlight: "#64605a" },
+    gate: { base: "#3a3531", shadow: "#25211f", highlight: "#4a433f" }
+  };
+
+  const colors = palette[obstacle.type] || { base: "#3b3533", shadow: "#26211f", highlight: "#5c5350" };
   ctx.fillStyle = colors.base;
-  ctx.fillRect(x, y, w, h);
-
-  if (colors.shadow) {
-    ctx.fillStyle = colors.shadow;
-    ctx.fillRect(x, y + h - 3, w, 3);
-  }
-
-  if (colors.highlight) {
-    ctx.fillStyle = colors.highlight;
-    ctx.fillRect(x, y, w, 2);
-  }
+  ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+  ctx.fillStyle = colors.shadow;
+  ctx.fillRect(obstacle.x, obstacle.y + obstacle.height - 3, obstacle.width, 3);
+  ctx.fillStyle = colors.highlight;
+  ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, 2);
 }
 
 function getPlayerSpriteDrawMetrics(player) {
   const drawX = Math.round(player.x + player.width / 2 - PLAYER_DRAW_SIZE / 2);
   const drawY = Math.round(player.y + player.height - PLAYER_DRAW_SIZE + PLAYER_FEET_OFFSET);
-  const feetX = Math.round(player.x + player.width / 2);
-  const feetY = Math.round(player.y + player.height);
-
-  return { drawX, drawY, feetX, feetY };
-}
-
-function drawPlayerDebug(ctx, player, metrics) {
-  ctx.strokeStyle = "rgba(60, 255, 120, 0.95)";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(
-    Math.round(player.x) + 0.5,
-    Math.round(player.y) + 0.5,
-    Math.round(player.width),
-    Math.round(player.height)
-  );
-
-  ctx.strokeStyle = "rgba(255, 80, 220, 0.95)";
-  ctx.strokeRect(
-    metrics.drawX + 0.5,
-    metrics.drawY + 0.5,
-    PLAYER_DRAW_SIZE,
-    PLAYER_DRAW_SIZE
-  );
-
-  ctx.strokeStyle = "rgba(255, 235, 80, 1)";
-  ctx.beginPath();
-  ctx.moveTo(metrics.feetX - 3, metrics.feetY + 0.5);
-  ctx.lineTo(metrics.feetX + 3, metrics.feetY + 0.5);
-  ctx.moveTo(metrics.feetX + 0.5, metrics.feetY - 3);
-  ctx.lineTo(metrics.feetX + 0.5, metrics.feetY + 3);
-  ctx.stroke();
+  return { drawX, drawY };
 }
 
 function drawPlayerSprite(ctx, player) {
   if (!playerSprite.complete || playerSprite.naturalWidth === 0) return;
-
-  const sx = CHARACTER_START_COLUMN * SPRITE_FRAME_SIZE;
-  const sy = CHARACTER_START_ROW * SPRITE_FRAME_SIZE;
-
   const metrics = getPlayerSpriteDrawMetrics(player);
 
-  ctx.drawImage(
-    playerSprite,
-    sx,
-    sy,
-    SPRITE_FRAME_SIZE,
-    SPRITE_FRAME_SIZE,
-    metrics.drawX,
-    metrics.drawY,
-    PLAYER_DRAW_SIZE,
-    PLAYER_DRAW_SIZE
-  );
+  ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+  ctx.beginPath();
+  ctx.ellipse(metrics.drawX + PLAYER_DRAW_SIZE / 2, metrics.drawY + PLAYER_DRAW_SIZE - 6, 12, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.drawImage(playerSprite, CHARACTER_START_COLUMN * SPRITE_FRAME_SIZE, CHARACTER_START_ROW * SPRITE_FRAME_SIZE, SPRITE_FRAME_SIZE, SPRITE_FRAME_SIZE, metrics.drawX, metrics.drawY, PLAYER_DRAW_SIZE, PLAYER_DRAW_SIZE);
 
   if (DEBUG_PLAYER_RENDER) {
-    drawPlayerDebug(ctx, player, metrics);
+    const collision = getPlayerCollisionRect(player);
+    ctx.strokeStyle = "rgba(60, 255, 120, 0.95)";
+    ctx.strokeRect(collision.x + 0.5, collision.y + 0.5, collision.width, collision.height);
   }
 }
 
@@ -179,34 +142,23 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
   ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
 
   ctx.fillStyle = "#11131a";
   ctx.fillRect(0, 0, map.width, map.height);
-
   drawGround(ctx, map);
 
-  map.obstacles.forEach((obstacle) => {
-    drawPixelRect(ctx, obstacle.x, obstacle.y, obstacle.width, obstacle.height, {
-      base: "#3b3533",
-      shadow: "#26211f",
-      highlight: "#5c5350"
-    });
-  });
-
+  const playerDepth = player.y + player.height;
+  map.obstacles.filter((o) => o.y + o.height <= playerDepth).forEach((o) => drawObstacle(ctx, o));
   drawPlayerSprite(ctx, player);
+  map.obstacles.filter((o) => o.y + o.height > playerDepth).forEach((o) => drawObstacle(ctx, o));
+
   drawRain(ctx, map.width, map.height, timeMs);
 
   if (nearbyInteractable) {
     ctx.strokeStyle = "rgba(222, 204, 145, 0.7)";
     ctx.lineWidth = 1;
-    ctx.strokeRect(
-      nearbyInteractable.x - 2,
-      nearbyInteractable.y - 2,
-      nearbyInteractable.width + 4,
-      nearbyInteractable.height + 4
-    );
+    ctx.strokeRect(nearbyInteractable.x - 2, nearbyInteractable.y - 2, nearbyInteractable.width + 4, nearbyInteractable.height + 4);
   }
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
