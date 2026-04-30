@@ -11,6 +11,7 @@ const CHARACTER_START_ROW = 0;
 const DEBUG_PLAYER_RENDER = false;
 const TILE_SIZE = 32;
 const GROUND_START_RATIO = 0.4;
+const CAMERA_ZOOM = 0.5;
 
 const playerSprite = new Image();
 playerSprite.src = "assets/images/rogues.png";
@@ -136,13 +137,24 @@ function drawPlayerSprite(ctx, player) {
 export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
   const canvasWidth = ctx.canvas.width;
   const canvasHeight = ctx.canvas.height;
-  const scaleX = canvasWidth / map.width;
-  const scaleY = canvasHeight / map.height;
+
+  const rawCameraX = player.x - canvasWidth / (2 * CAMERA_ZOOM);
+  const rawCameraY = player.y - canvasHeight / (2 * CAMERA_ZOOM);
+  const maxCameraX = Math.max(0, map.width - canvasWidth / CAMERA_ZOOM);
+  const maxCameraY = Math.max(0, map.height - canvasHeight / CAMERA_ZOOM);
+  const cameraX = Math.max(0, Math.min(rawCameraX, maxCameraX));
+  const cameraY = Math.max(0, Math.min(rawCameraY, maxCameraY));
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-  ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+
+  ctx.setTransform(
+    CAMERA_ZOOM, 0,
+    0, CAMERA_ZOOM,
+    -cameraX * CAMERA_ZOOM,
+    -cameraY * CAMERA_ZOOM
+  );
 
   ctx.fillStyle = "#11131a";
   ctx.fillRect(0, 0, map.width, map.height);
