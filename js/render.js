@@ -63,7 +63,7 @@ function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
 
 function drawFallbackTile(ctx, x, y, baseColor, accentColor = null) {
   ctx.fillStyle = baseColor;
-  ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
 
   if (accentColor) {
     ctx.fillStyle = accentColor;
@@ -139,27 +139,31 @@ function drawGround(ctx, map) {
 
     drawFallbackTile(ctx, x, y, "#1c221d");
 
-    if (n1 > 0.92) {
-      ctx.fillStyle = "#22261f";
-      ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+   if (n1 > 0.96) {
+  ctx.fillStyle = "#22261f";
+  ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
     }
 
-    if (n2 > 0.94) {
-      ctx.fillStyle = "#262b23";
-      ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+   if (n2 > 0.94) {
+    ctx.fillStyle = "#262b23";
+    ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
     }
 
     if (n3 > 0.96) {
       ctx.fillStyle = "rgba(0,0,0,0.25)";
       ctx.fillRect(x + 4, y + 12, 20, 2);
     }
+    
+     if (path) {
+  ctx.fillStyle = "rgba(48, 38, 28, 0.55)";
+  ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-    if (path) {
-      ctx.fillStyle = "rgba(48, 38, 28, 0.55)";
-      ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-    }
+  // soft edge blend
+  ctx.fillStyle = "rgba(0,0,0,0.15)";
+  ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+} 
 
-    if (!path && puddle && n3 > 0.35) {
+   if (!path && puddle && n3 > 0.35) {
       ctx.fillStyle = "rgba(35, 45, 55, 0.38)";
       ctx.beginPath();
       ctx.ellipse(x + 16, y + 19, 12, 5, 0, 0, Math.PI * 2);
