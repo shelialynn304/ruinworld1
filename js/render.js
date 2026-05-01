@@ -20,21 +20,13 @@ playerSprite.src = "assets/images/rogues.png";
 const tileSprite = new Image();
 tileSprite.src = "assets/images/tiles.png";
 
-/**
- * Tile coordinates assume a 32x32 tilesheet.
- * If a tile looks wrong, change the col/row values here only.
- */
-const GROUND_BASE_TILE = { col: 1, row: 11 };
-const GROUND_VARIANTS = [
-  { col: 0, row: 11 },
-  { col: 2, row: 11 },
-  { col: 0, row: 12 }
-];
-
-const PATH_TILE = { col: 0, row: 10 };
-const CRACK_TILE = { col: 6, row: 15 };
-const WEED_TILE = { col: 7, row: 15 };
-const PUDDLE_TILE = { col: 5, row: 15 };
+// Tiles are disabled for now because the current coordinates were pulling ugly/broken tiles.
+const GROUND_BASE_TILE = null;
+const GROUND_VARIANTS = [];
+const PATH_TILE = null;
+const CRACK_TILE = null;
+const WEED_TILE = null;
+const PUDDLE_TILE = null;
 
 function tileNoise(x, y, seed = 0) {
   const n = Math.sin(x * 12.9898 + y * 78.233 + seed * 37.719) * 43758.5453;
@@ -42,7 +34,7 @@ function tileNoise(x, y, seed = 0) {
 }
 
 function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
-  if (!tileSprite.complete || tileSprite.naturalWidth === 0) {
+  if (!tile || !tileSprite.complete || tileSprite.naturalWidth === 0) {
     return false;
   }
 
@@ -63,7 +55,7 @@ function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
 
 function drawFallbackTile(ctx, x, y, baseColor, accentColor = null) {
   ctx.fillStyle = baseColor;
-ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+  ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
 
   if (accentColor) {
     ctx.fillStyle = accentColor;
@@ -79,14 +71,6 @@ function isMainPathTile(col, row, cols) {
   const lowerCurve = row > 30 && col > 4 && col < 28 && Math.abs(row - (42 - col * 0.35)) < 3;
 
   return diagonalPath || chapelApproach || lowerCurve;
-}
-
-function isGravePlotTile(col, row) {
-  const inRows = row > 5 && row < 38;
-  const leftPlots = col > 5 && col < 34 && col % 6 <= 1 && row % 7 <= 2;
-  const rightPlots = col > 47 && col < 83 && col % 7 <= 1 && row % 6 <= 2;
-
-  return inRows && (leftPlots || rightPlots);
 }
 
 function isPuddleTile(col, row) {
@@ -107,10 +91,6 @@ function drawGround(ctx, map) {
   ctx.fillStyle = "#11131a";
   ctx.fillRect(0, 0, map.width, map.height);
 
-  /**
-   * Upper background area.
-   * This keeps the top of the scene from looking like raw empty canvas.
-   */
   const skyGradient = ctx.createLinearGradient(0, 0, 0, groundStartY + 120);
   skyGradient.addColorStop(0, "#0c0f14");
   skyGradient.addColorStop(0.55, "#151a18");
@@ -119,82 +99,72 @@ function drawGround(ctx, map) {
   ctx.fillStyle = skyGradient;
   ctx.fillRect(0, 0, map.width, groundStartY + 160);
 
-  /**
-   * Ground base.
-   */
   ctx.fillStyle = "#151a17";
   ctx.fillRect(0, groundStartY, map.width, groundHeight);
 
- for (let row = 0; row < rows; row += 1) {
-  for (let col = 0; col < cols; col += 1) {
-    const x = col * TILE_SIZE;
-    const y = groundStartY + row * TILE_SIZE;
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const x = col * TILE_SIZE;
+      const y = groundStartY + row * TILE_SIZE;
 
-    const n1 = tileNoise(col, row, 4);
-    const n2 = tileNoise(col, row, 8);
-    const n3 = tileNoise(col, row, 12);
+      const n1 = tileNoise(col, row, 4);
+      const n2 = tileNoise(col, row, 8);
+      const n3 = tileNoise(col, row, 12);
 
-    const path = isMainPathTile(col, row, cols);
-    const puddle = isPuddleTile(col, row);
+      const path = isMainPathTile(col, row, cols);
+      const puddle = isPuddleTile(col, row);
 
-    drawFallbackTile(ctx, x, y, "#1c221d");
+      drawFallbackTile(ctx, x, y, "#1c221d");
 
-   if (n1 > 0.96) {
-  ctx.fillStyle = "#22261f";
-  ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
-    }
+      if (n1 > 0.96) {
+        ctx.fillStyle = "#22261f";
+        ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+      }
 
-   if (n2 > 0.94) {
-    ctx.fillStyle = "#262b23";
-    ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
-    }
+      if (n2 > 0.94) {
+        ctx.fillStyle = "#262b23";
+        ctx.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+      }
 
-    if (n3 > 0.96) {
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
-      ctx.fillRect(x + 4, y + 12, 20, 2);
-    }
+      if (n3 > 0.96) {
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.fillRect(x + 4, y + 12, 20, 2);
+      }
 
-    if (n2 > 0.97) {
-  ctx.fillStyle = "rgba(30, 30, 25, 0.4)";
-  ctx.beginPath();
-  ctx.ellipse(x + 16, y + 16, 10, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
-}
-    
-     if (path) {
-  ctx.fillStyle = "rgba(48, 38, 28, 0.55)";
-  ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+      if (n2 > 0.97) {
+        ctx.fillStyle = "rgba(30, 30, 25, 0.4)";
+        ctx.beginPath();
+        ctx.ellipse(x + 16, y + 16, 10, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
-  // soft edge blend
-  ctx.fillStyle = "rgba(0,0,0,0.15)";
-  ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-} 
+      if (path) {
+        ctx.fillStyle = "rgba(48, 38, 28, 0.55)";
+        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-   if (!path && puddle && n3 > 0.35) {
-      ctx.fillStyle = "rgba(35, 45, 55, 0.38)";
-      ctx.beginPath();
-      ctx.ellipse(x + 16, y + 19, 12, 5, 0, 0, Math.PI * 2);
-      ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+      }
 
-      ctx.fillStyle = "rgba(120, 140, 155, 0.16)";
-      ctx.fillRect(x + 9, y + 17, 10, 1);
+      if (!path && puddle && n3 > 0.35) {
+        ctx.fillStyle = "rgba(35, 45, 55, 0.38)";
+        ctx.beginPath();
+        ctx.ellipse(x + 16, y + 19, 12, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "rgba(120, 140, 155, 0.16)";
+        ctx.fillRect(x + 9, y + 17, 10, 1);
+      }
     }
   }
-}
 
-ctx.fillStyle = "rgba(0,0,0,0.25)";
-ctx.fillRect(0, groundStartY, map.width, 40);
-ctx.fillRect(0, map.height - 40, map.width, 40);
-  
-  /**
-   * Dark rainy overlay.
-   */
   ctx.fillStyle = "rgba(8, 10, 14, 0.28)";
   ctx.fillRect(0, groundStartY, map.width, groundHeight);
 
-  /**
-   * Soft transition from upper scene into playable ground.
-   */
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.fillRect(0, groundStartY, map.width, 40);
+  ctx.fillRect(0, map.height - 40, map.width, 40);
+
   const transition = ctx.createLinearGradient(0, groundStartY - 96, 0, groundStartY + 96);
   transition.addColorStop(0, "rgba(70, 98, 82, 0.24)");
   transition.addColorStop(0.55, "rgba(36, 50, 42, 0.12)");
@@ -254,9 +224,6 @@ function drawObstacle(ctx, obstacle) {
 
   ctx.save();
 
-  /**
-   * Ground contact shadow.
-   */
   ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
   ctx.beginPath();
   ctx.ellipse(x + width / 2, y + height - 1, width * 0.48, Math.max(3, height * 0.12), 0, 0, Math.PI * 2);
@@ -377,17 +344,30 @@ function drawBuildingBlock(ctx, x, y, width, height, colors) {
   ctx.fillStyle = colors.shadow;
   ctx.fillRect(x + 5, y + 5, width, height);
 
+  ctx.fillStyle = colors.shadow;
+  ctx.beginPath();
+  ctx.moveTo(x - 4, y);
+  ctx.lineTo(x + width + 4, y);
+  ctx.lineTo(x + width / 2, y - height * 0.25);
+  ctx.closePath();
+  ctx.fill();
+
   ctx.fillStyle = colors.base;
   ctx.fillRect(x, y, width, height);
 
   ctx.fillStyle = colors.highlight;
   ctx.fillRect(x, y, width, 3);
 
-  /**
-   * Door/window hints.
-   */
-  ctx.fillStyle = "rgba(12, 10, 12, 0.55)";
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.fillRect(x - 3, y + height - 2, width + 6, 4);
+
+  ctx.fillStyle = "rgba(5, 5, 8, 0.9)";
   ctx.fillRect(x + width * 0.42, y + height * 0.55, width * 0.16, height * 0.45);
+
+  const flicker = 0.04 + Math.sin(Date.now() * 0.01) * 0.02;
+
+  ctx.fillStyle = `rgba(200, 140, 60, ${flicker})`;
+  ctx.fillRect(x + width * 0.44, y + height * 0.6, width * 0.12, height * 0.35);
 
   ctx.fillStyle = "rgba(218, 196, 128, 0.12)";
   ctx.fillRect(x + width * 0.18, y + height * 0.28, width * 0.13, height * 0.16);
@@ -404,9 +384,6 @@ function getPlayerSpriteDrawMetrics(player) {
 function drawPlayerSprite(ctx, player) {
   const metrics = getPlayerSpriteDrawMetrics(player);
 
-  /**
-   * Player shadow.
-   */
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
   ctx.beginPath();
   ctx.ellipse(
@@ -433,9 +410,6 @@ function drawPlayerSprite(ctx, player) {
       PLAYER_DRAW_SIZE
     );
   } else {
-    /**
-     * Fallback so the game is still playable if the sprite fails.
-     */
     ctx.fillStyle = "#b8a46f";
     ctx.fillRect(player.x, player.y, player.width, player.height);
 
@@ -544,22 +518,13 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs = 0) {
 
   const { cameraX, cameraY, offsetX, offsetY } = getCamera(canvasWidth, canvasHeight, map, player);
 
-  /**
-   * Reset screen-space transform.
-   */
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-  /**
-   * Letterbox/backdrop color.
-   */
   ctx.fillStyle = "#090b10";
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-  /**
-   * Enter world-space camera transform.
-   */
   ctx.setTransform(
     CAMERA_ZOOM,
     0,
@@ -572,12 +537,8 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs = 0) {
   drawGround(ctx, map);
 
   const playerDepth = player.y + player.height;
-
   const obstacles = Array.isArray(map.obstacles) ? map.obstacles : [];
 
-  /**
-   * Draw objects behind player first.
-   */
   obstacles
     .filter((obstacle) => obstacle.y + obstacle.height <= playerDepth)
     .sort((a, b) => a.y + a.height - (b.y + b.height))
@@ -585,9 +546,6 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs = 0) {
 
   drawPlayerSprite(ctx, player);
 
-  /**
-   * Draw objects in front of player.
-   */
   obstacles
     .filter((obstacle) => obstacle.y + obstacle.height > playerDepth)
     .sort((a, b) => a.y + a.height - (b.y + b.height))
@@ -599,9 +557,5 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs = 0) {
   drawFogBanks(ctx, map, timeMs);
   drawVignette(ctx, map);
 
-  /**
-   * Reset transform so UI code elsewhere is not poisoned.
-   * Poisoned transforms are how canvas bugs reproduce in the wild.
-   */
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
