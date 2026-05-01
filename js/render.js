@@ -10,7 +10,7 @@ const CHARACTER_START_ROW = 0;
 
 const DEBUG_PLAYER_RENDER = false;
 const TILE_SIZE = 32;
-const GROUND_START_RATIO = 0;
+const GROUND_START_RATIO = 0.4;
 const CAMERA_ZOOM = 1.0;
 
 const playerSprite = new Image();
@@ -70,53 +70,27 @@ function drawGround(ctx, map) {
   const puddleClusters = [{ x: 22, y: 38, rx: 4, ry: 3 }, { x: 55, y: 30, rx: 3, ry: 2 }, { x: 84, y: 20, rx: 4, ry: 2 }];
   const weedClusters = [{ x: 14, y: 28, rx: 6, ry: 5 }, { x: 42, y: 24, rx: 5, ry: 4 }, { x: 70, y: 14, rx: 6, ry: 4 }];
 
+  ctx.fillStyle = "#1b201d";
+  ctx.fillRect(0, groundStartY, map.width, groundHeight);
+
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < cols; col += 1) {
       const x = col * TILE_SIZE;
-      const y = row * TILE_SIZE;
+      const y = groundStartY + row * TILE_SIZE;
       drawTile(ctx, GROUND_BASE_TILE, x, y);
 
-      if (tileNoise(col, row, 10) > 0.92 && tileNoise(col, row, 11) > 0.45) {
-        drawTile(ctx, GROUND_VARIANTS[Math.floor(tileNoise(col, row, 12) * GROUND_VARIANTS.length)], x, y);
+      if (tileNoise(col, row, 4) > 0.9) {
+        drawTile(ctx, GROUND_VARIANTS[Math.floor(tileNoise(col, row, 8) * GROUND_VARIANTS.length)], x, y);
       }
-
-      const biome = getBiome(col, row);
-      const onPath = pathCenters.some((p) => inEllipse(col, row, p.x, p.y, p.rx, p.ry));
-      if (onPath) {
-        drawTile(ctx, PATH_TILE, x, y);
-        if (tileNoise(col, row, 13) > 0.78) drawTile(ctx, CRACK_TILE, x, y);
-        continue;
-      }
-
-      const inPuddle = puddleClusters.some((p) => inEllipse(col, row, p.x, p.y, p.rx, p.ry));
-      const inWeeds = weedClusters.some((p) => inEllipse(col, row, p.x, p.y, p.rx, p.ry));
-
-      if (biome === "muddy_lowland") {
-        if ((inPuddle && tileNoise(col, row, 14) > 0.42) || tileNoise(col, row, 24) > 0.985) {
-          drawTile(ctx, PUDDLE_TILE, x, y);
-          continue;
-        }
-      }
-
-      if (biome === "overgrown_corner") {
-        if ((inWeeds && tileNoise(col, row, 15) > 0.4) || tileNoise(col, row, 25) > 0.95) {
-          drawTile(ctx, WEED_TILE, x, y);
-          continue;
-        }
-      }
-
-      if (biome === "chapel_rise" && tileNoise(col, row, 26) > 0.86) {
-        drawTile(ctx, CRACK_TILE, x, y);
-      } else if (inPuddle && tileNoise(col, row, 14) > 0.58) {
-        drawTile(ctx, PUDDLE_TILE, x, y);
-      } else if ((inWeeds && tileNoise(col, row, 15) > 0.52) || tileNoise(col, row, 16) > 0.975) {
-        drawTile(ctx, WEED_TILE, x, y);
-      }
+      if (isPathTile(col, row)) drawTile(ctx, PATH_TILE, x, y);
+      if (isPlotTile(col, row) && tileNoise(col, row, 5) > 0.35) drawTile(ctx, CRACK_TILE, x, y);
+      if (tileNoise(col, row, 6) > 0.95) drawTile(ctx, WEED_TILE, x, y);
+      if (row > 5 && tileNoise(col, row, 7) > 0.975) drawTile(ctx, PUDDLE_TILE, x, y);
     }
   }
 
-  ctx.fillStyle = "rgba(10, 12, 16, 0.26)";
-  ctx.fillRect(0, 0, map.width, map.height);
+  ctx.fillStyle = "rgba(10, 12, 16, 0.28)";
+  ctx.fillRect(0, groundStartY, map.width, groundHeight);
 }
 
 function drawRain(ctx, width, height, timeMs) {
@@ -148,6 +122,7 @@ function drawObstacle(ctx, obstacle) {
     broken_wall: { base: "#3f3a38", shadow: "#272321", highlight: "#57504d" },
     mausoleum: { base: "#353237", shadow: "#232127", highlight: "#4b474f" },
     unique_grave: { base: "#575147", shadow: "#353026", highlight: "#786f61" }
+    gate: { base: "#3a3531", shadow: "#25211f", highlight: "#4a433f" }
   };
 
   const colors = palette[obstacle.type] || { base: "#3b3533", shadow: "#26211f", highlight: "#5c5350" };
