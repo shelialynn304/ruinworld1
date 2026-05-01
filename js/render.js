@@ -125,77 +125,51 @@ function drawGround(ctx, map) {
   ctx.fillStyle = "#151a17";
   ctx.fillRect(0, groundStartY, map.width, groundHeight);
 
-  for (let row = 0; row < rows; row += 1) {
-    for (let col = 0; col < cols; col += 1) {
-      const x = col * TILE_SIZE;
-      const y = groundStartY + row * TILE_SIZE;
+ for (let row = 0; row < rows; row += 1) {
+  for (let col = 0; col < cols; col += 1) {
+    const x = col * TILE_SIZE;
+    const y = groundStartY + row * TILE_SIZE;
 
-      const n1 = tileNoise(col, row, 4);
-      const n2 = tileNoise(col, row, 8);
-      const n3 = tileNoise(col, row, 12);
+    const n1 = tileNoise(col, row, 4);
+    const n2 = tileNoise(col, row, 8);
+    const n3 = tileNoise(col, row, 12);
 
-      const path = isMainPathTile(col, row, cols);
-      const gravePlot = isGravePlotTile(col, row);
-      const puddle = isPuddleTile(col, row);
-
+    const path = isMainPathTile(col, row, cols);
+    const puddle = isPuddleTile(col, row);
 
     drawFallbackTile(ctx, x, y, "#1c221d");
 
-      // darker patches
-      if (n1 > 0.92) {
-     ctx.fillStyle = "#22261f";
+    if (n1 > 0.92) {
+      ctx.fillStyle = "#22261f";
       ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
- }
+    }
 
-     // subtle lighter variation
-       if (n2 > 0.94) {
-       ctx.fillStyle = "#262b23";
-       ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
- }
-      // tiny noise streaks (breaks grid look)
-       if (n3 > 0.96) {
-       ctx.fillStyle = "rgba(0,0,0,0.25)";
-       ctx.fillRect(x + 4, y + 12, 20, 2);
-}
+    if (n2 > 0.94) {
+      ctx.fillStyle = "#262b23";
+      ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+    }
 
-      if (path) {
-        const pathDrawn = drawTile(ctx, PATH_TILE, x, y);
+    if (n3 > 0.96) {
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(x + 4, y + 12, 20, 2);
+    }
 
-        if (!pathDrawn) {
-          drawFallbackTile(ctx, x, y, "#30281f", "#463a2c");
-        }
-      }
+    if (path) {
+      ctx.fillStyle = "rgba(48, 38, 28, 0.55)";
+      ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+    }
 
-      if (gravePlot && !path && n2 > 0.44) {
-        const crackDrawn = drawTile(ctx, CRACK_TILE, x, y);
+    if (!path && puddle && n3 > 0.35) {
+      ctx.fillStyle = "rgba(35, 45, 55, 0.38)";
+      ctx.beginPath();
+      ctx.ellipse(x + 16, y + 19, 12, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-        if (!crackDrawn) {
-          ctx.fillStyle = "rgba(16, 15, 14, 0.35)";
-          ctx.fillRect(x + 4, y + 14, TILE_SIZE - 8, 3);
-        }
-      }
-
-      if (!path && n3 > 0.94) {
-        const weedDrawn = drawTile(ctx, WEED_TILE, x, y);
-
-        if (!weedDrawn) {
-          ctx.fillStyle = "rgba(55, 75, 48, 0.45)";
-          ctx.fillRect(x + 7, y + 18, 18, 5);
-        }
-      }
-
-     if (!path && puddle && n3 > 0.35) {
-  ctx.fillStyle = "rgba(35, 45, 55, 0.38)";
-  ctx.beginPath();
-  ctx.ellipse(x + 16, y + 19, 12, 5, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "rgba(120, 140, 155, 0.16)";
-  ctx.fillRect(x + 9, y + 17, 10, 1);
-}
-      }
+      ctx.fillStyle = "rgba(120, 140, 155, 0.16)";
+      ctx.fillRect(x + 9, y + 17, 10, 1);
     }
   }
+}
 
   /**
    * Dark rainy overlay.
