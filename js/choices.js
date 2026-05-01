@@ -48,9 +48,28 @@ export const CHOICE_HANDLERS = {
   }
 };
 
-export function runChoiceAction(action) {
-  const handler = CHOICE_HANDLERS[action];
-  if (typeof handler === "function") {
-    handler();
+
+function hasRewardedInteraction(interactionId) {
+  if (!interactionId) return false;
+  return Array.isArray(gameState.rewardedInteractions) && gameState.rewardedInteractions.includes(interactionId);
+}
+
+function markInteractionRewarded(interactionId) {
+  if (!interactionId) return;
+  if (!Array.isArray(gameState.rewardedInteractions)) {
+    gameState.rewardedInteractions = [];
   }
+  if (!gameState.rewardedInteractions.includes(interactionId)) {
+    gameState.rewardedInteractions.push(interactionId);
+  }
+}
+
+export function runChoiceAction(action, interactionId = null) {
+  const handler = CHOICE_HANDLERS[action];
+  if (typeof handler !== "function") return;
+
+  if (hasRewardedInteraction(interactionId)) return;
+
+  handler();
+  markInteractionRewarded(interactionId);
 }

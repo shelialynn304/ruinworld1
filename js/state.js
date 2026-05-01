@@ -11,6 +11,7 @@ export const gameState = {
   followerCount: 0,
   gold: 0,
   relics: [],
+  rewardedInteractions: [],
   memoryState: "fractured",
   graveClue: null,
   playerPosition: { x: 96, y: 360 },
@@ -39,6 +40,7 @@ export function getDefaultState() {
     followerCount: 0,
     gold: 0,
     relics: [],
+    rewardedInteractions: [],
     memoryState: "fractured",
     graveClue: null,
     playerPosition: { x: 96, y: 360 },
@@ -58,6 +60,7 @@ export function applyState(nextState) {
   Object.assign(gameState, getDefaultState(), nextState);
   gameState.flags = { ...getDefaultState().flags, ...(nextState.flags || {}) };
   gameState.relics = Array.isArray(nextState.relics) ? nextState.relics : [];
+  gameState.rewardedInteractions = Array.isArray(nextState.rewardedInteractions) ? nextState.rewardedInteractions : [];
   gameState.playerPosition = {
     ...getDefaultState().playerPosition,
     ...(nextState.playerPosition || {})

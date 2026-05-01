@@ -14,7 +14,7 @@ export function isDialogueOpen() {
   return open;
 }
 
-export function openDialogue(sceneId, onClose) {
+export function openDialogue(sceneId, onClose, interactionId = null) {
   const scene = STORY[sceneId];
   if (!scene || !ui) return;
 
@@ -33,7 +33,7 @@ export function openDialogue(sceneId, onClose) {
     button.className = "choice-btn";
     button.textContent = choice.text;
     button.addEventListener("click", () => {
-      runChoiceAction(choice.action);
+      runChoiceAction(choice.action, interactionId);
       closeDialogue();
     });
     ui.choicesContainer.appendChild(button);

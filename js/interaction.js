@@ -15,7 +15,7 @@ export function updateInteraction(player, map, onDialogueClosed) {
   const nearby = getNearbyInteractable(player, map);
 
   if (nearby && consumeInteractPress() && !isDialogueOpen()) {
-    openDialogue(nearby.sceneId, onDialogueClosed);
+    openDialogue(nearby.sceneId, onDialogueClosed, nearby.id || nearby.sceneId);
   }
 
   return nearby;
