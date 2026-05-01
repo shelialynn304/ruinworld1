@@ -178,15 +178,15 @@ function drawGround(ctx, map) {
         }
       }
 
-      if (!path && puddle && n3 > 0.35) {
-        const puddleDrawn = drawTile(ctx, PUDDLE_TILE, x, y);
+     if (!path && puddle && n3 > 0.35) {
+  ctx.fillStyle = "rgba(35, 45, 55, 0.38)";
+  ctx.beginPath();
+  ctx.ellipse(x + 16, y + 19, 12, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-        if (!puddleDrawn) {
-          ctx.fillStyle = "rgba(48, 59, 69, 0.45)";
-          ctx.beginPath();
-          ctx.ellipse(x + 16, y + 19, 12, 5, 0, 0, Math.PI * 2);
-          ctx.fill();
-        }
+  ctx.fillStyle = "rgba(120, 140, 155, 0.16)";
+  ctx.fillRect(x + 9, y + 17, 10, 1);
+}
       }
     }
   }
