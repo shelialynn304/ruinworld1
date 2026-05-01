@@ -499,3 +499,33 @@ This project should become:
 - a choice-driven RPG with consequence and atmosphere
 - a game where music, writing, dialogue, and identity matter more than combat
 - a static browser game that feels eerie, memorable, and genuinely alive
+
+
+## Code Modification Restrictions
+
+The following files are considered CORE SYSTEM FILES and should not be modified unless explicitly instructed:
+
+- js/render.js
+- js/player.js
+- js/input.js
+- js/collision.js
+- js/save.js
+
+Rules:
+- Do not refactor or rewrite these files
+- Do not change formatting or structure
+- Do not “improve” or optimize them
+- Only modify them if the user explicitly names the file in the request
+
+When changes are needed:
+- Explain why before modifying
+- Make the smallest possible change
+- Preserve all existing behavior
+
+General rules for all files:
+- Make minimal targeted edits
+- Avoid large rewrites
+- Do not modify unrelated files
+- Do not perform “while I'm here” improvements
+
+- Prefer adding new functions instead of modifying existing ones.
