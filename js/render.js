@@ -153,6 +153,13 @@ function drawGround(ctx, map) {
       ctx.fillStyle = "rgba(0,0,0,0.25)";
       ctx.fillRect(x + 4, y + 12, 20, 2);
     }
+
+    if (n2 > 0.97) {
+  ctx.fillStyle = "rgba(30, 30, 25, 0.4)";
+  ctx.beginPath();
+  ctx.ellipse(x + 16, y + 16, 10, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
     
      if (path) {
   ctx.fillStyle = "rgba(48, 38, 28, 0.55)";
