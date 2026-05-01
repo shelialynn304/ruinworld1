@@ -485,22 +485,15 @@ function getCamera(canvasWidth, canvasHeight, map, player) {
   return { cameraX, cameraY, offsetX, offsetY };
 }
 
+
 function drawInteractableHighlight(ctx, nearbyInteractable) {
   if (!nearbyInteractable) return;
 
-  const pulse = 0.55 + Math.sin(Date.now() * 0.006) * 0.2;
+  const pulse = 0.6 + Math.sin(Date.now() * 0.008) * 0.25;
 
   ctx.save();
 
-  ctx.strokeStyle = `rgba(222, 204, 145, ${pulse})`;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(
-    nearbyInteractable.x - 2,
-    nearbyInteractable.y - 2,
-    nearbyInteractable.width + 4,
-    nearbyInteractable.height + 4
-  );
-
+  // outer glow fill
   ctx.fillStyle = `rgba(222, 204, 145, ${pulse * 0.08})`;
   ctx.fillRect(
     nearbyInteractable.x - 2,
@@ -509,9 +502,29 @@ function drawInteractableHighlight(ctx, nearbyInteractable) {
     nearbyInteractable.height + 4
   );
 
+  // main outline
+  ctx.strokeStyle = `rgba(222, 204, 145, ${pulse})`;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(
+    nearbyInteractable.x - 2,
+    nearbyInteractable.y - 2,
+    nearbyInteractable.width + 4,
+    nearbyInteractable.height + 4
+  );
+
+  // inner highlight (adds polish)
+  ctx.strokeStyle = `rgba(255, 240, 180, ${pulse * 0.6})`;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(
+    nearbyInteractable.x,
+    nearbyInteractable.y,
+    nearbyInteractable.width,
+    nearbyInteractable.height
+  );
+
   ctx.restore();
 }
-
+  
 export function renderScene(ctx, map, player, nearbyInteractable, timeMs = 0) {
   const canvasWidth = ctx.canvas.width;
   const canvasHeight = ctx.canvas.height;
