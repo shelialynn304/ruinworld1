@@ -54,27 +54,38 @@ function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
   return true;
 }
 
-function isMainPathTile(col, row, cols) {
-  const center = Math.floor(cols / 2);
-  const winding = Math.round(Math.sin(row * 0.75) * 2);
-  const pathCenter = center + winding;
-
-  return Math.abs(col - pathCenter) <= 1 || (row > 8 && Math.abs(col - 4) <= 1);
+function inEllipse(x, y, cx, cy, rx, ry) {
+  const dx = (x - cx) / rx;
+  const dy = (y - cy) / ry;
+  return dx * dx + dy * dy <= 1;
 }
 
-function isGravePlotTile(col, row) {
-  const inRowBand = row >= 3 && row <= 16;
-  const rowSpacing = row % 4 === 0 || row % 4 === 1;
-  const colSpacing = col % 4 === 1 || col % 4 === 2;
 
-  return inRowBand && rowSpacing && colSpacing;
+function getBiome(col, row) {
+  if (col < 28 && row > 32) return "muddy_lowland";
+  if (col > 66 && row < 20) return "chapel_rise";
+  if (col > 58 && row > 24) return "overgrown_corner";
+  return "graveyard_mid";
 }
 
 function drawGround(ctx, map) {
-  const groundStartY = Math.floor(map.height * GROUND_START_RATIO);
-  const groundHeight = map.height - groundStartY;
   const cols = Math.ceil(map.width / TILE_SIZE);
-  const rows = Math.ceil(groundHeight / TILE_SIZE);
+  const rows = Math.ceil(map.height / TILE_SIZE);
+
+  ctx.fillStyle = "#1b201d";
+  ctx.fillRect(0, 0, map.width, map.height);
+
+  const pathCenters = [
+    { x: 8, y: 40, rx: 10, ry: 5 },
+    { x: 18, y: 34, rx: 12, ry: 5 },
+    { x: 30, y: 29, rx: 10, ry: 4 },
+    { x: 45, y: 22, rx: 11, ry: 5 },
+    { x: 60, y: 16, rx: 9, ry: 4 },
+    { x: 75, y: 11, rx: 8, ry: 4 }
+  ];
+
+  const puddleClusters = [{ x: 22, y: 38, rx: 4, ry: 3 }, { x: 55, y: 30, rx: 3, ry: 2 }, { x: 84, y: 20, rx: 4, ry: 2 }];
+  const weedClusters = [{ x: 14, y: 28, rx: 6, ry: 5 }, { x: 42, y: 24, rx: 5, ry: 4 }, { x: 70, y: 14, rx: 6, ry: 4 }];
 
   ctx.fillStyle = "#151a17";
   ctx.fillRect(0, groundStartY, map.width, groundHeight);
@@ -156,6 +167,14 @@ function drawObstacle(ctx, obstacle) {
     fence: { base: "#40352f", shadow: "#2a221e", highlight: "#564840" },
     chapel: { base: "#352f33", shadow: "#221f24", highlight: "#48424a" },
     statue: { base: "#4b4742", shadow: "#2d2a27", highlight: "#64605a" },
+    gate: { base: "#3a3531", shadow: "#25211f", highlight: "#4a433f" },
+    tree: { base: "#292b21", shadow: "#1d1f17", highlight: "#3a3d2e" },
+    dead_tree: { base: "#3e342d", shadow: "#271f1a", highlight: "#584a3d" },
+    brush: { base: "#2b3328", shadow: "#1d241b", highlight: "#3b4537" },
+    cliff: { base: "#2d2e31", shadow: "#1d1f22", highlight: "#3f4145" },
+    broken_wall: { base: "#3f3a38", shadow: "#272321", highlight: "#57504d" },
+    mausoleum: { base: "#353237", shadow: "#232127", highlight: "#4b474f" },
+    unique_grave: { base: "#575147", shadow: "#353026", highlight: "#786f61" }
     gate: { base: "#3a3531", shadow: "#25211f", highlight: "#4a433f" }
   };
 
@@ -219,6 +238,19 @@ function drawPlayerSprite(ctx, player) {
   }
 }
 
+
+function drawFogBanks(ctx, map, timeMs) {
+  const drift = Math.sin(timeMs * 0.0002) * 14;
+  ctx.fillStyle = "rgba(170, 180, 185, 0.08)";
+  ctx.beginPath();
+  ctx.ellipse(500 + drift, 1220, 340, 90, 0, 0, Math.PI * 2);
+  ctx.ellipse(1680 - drift * 0.6, 980, 420, 110, 0, 0, Math.PI * 2);
+  ctx.ellipse(2550 + drift * 0.8, 700, 360, 96, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(100, 110, 120, 0.06)";
+  ctx.fillRect(0, 0, map.width, 96);
+  ctx.fillRect(0, map.height - 96, map.width, 96);
 function getCamera(canvasWidth, canvasHeight, map, player) {
   const visibleWidth = canvasWidth / CAMERA_ZOOM;
   const visibleHeight = canvasHeight / CAMERA_ZOOM;
@@ -278,6 +310,7 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs) {
     .forEach((o) => drawObstacle(ctx, o));
 
   drawRain(ctx, map.width, map.height, timeMs);
+  drawFogBanks(ctx, map, timeMs);
 
   if (nearbyInteractable) {
     ctx.strokeStyle = "rgba(222, 204, 145, 0.7)";
