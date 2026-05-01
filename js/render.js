@@ -138,19 +138,25 @@ function drawGround(ctx, map) {
       const gravePlot = isGravePlotTile(col, row);
       const puddle = isPuddleTile(col, row);
 
-      const baseDrawn = drawTile(ctx, GROUND_BASE_TILE, x, y);
-      if (!baseDrawn) {
-        drawFallbackTile(ctx, x, y, "#1c221d");
-      }
 
-      if (!path && n1 > 0.78) {
-        const variant = GROUND_VARIANTS[Math.floor(n2 * GROUND_VARIANTS.length)];
-        const variantDrawn = drawTile(ctx, variant, x, y);
+    drawFallbackTile(ctx, x, y, "#1c221d");
 
-        if (!variantDrawn) {
-          drawFallbackTile(ctx, x, y, "#20271f", "#293328");
-        }
-      }
+      // darker patches
+      if (n1 > 0.92) {
+     ctx.fillStyle = "#22261f";
+      ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+ }
+
+     // subtle lighter variation
+       if (n2 > 0.94) {
+       ctx.fillStyle = "#262b23";
+       ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+ }
+      // tiny noise streaks (breaks grid look)
+       if (n3 > 0.96) {
+       ctx.fillStyle = "rgba(0,0,0,0.25)";
+       ctx.fillRect(x + 4, y + 12, 20, 2);
+}
 
       if (path) {
         const pathDrawn = drawTile(ctx, PATH_TILE, x, y);
