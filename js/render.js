@@ -175,6 +175,10 @@ function drawGround(ctx, map) {
   }
 }
 
+ctx.fillStyle = "rgba(0,0,0,0.25)";
+ctx.fillRect(0, groundStartY, map.width, 40);
+ctx.fillRect(0, map.height - 40, map.width, 40);
+  
   /**
    * Dark rainy overlay.
    */
