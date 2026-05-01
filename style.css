@@ -117,6 +117,11 @@ button {
   justify-content: center;
 }
 
+.title-utility-controls {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .intro-sequence-text {
   min-height: 120px;
   max-width: 760px;
@@ -163,7 +168,7 @@ button {
 
 .game-hud {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
@@ -179,13 +184,6 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.75rem;
-}
-
-.hud-controls {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
 .interaction-prompt {
