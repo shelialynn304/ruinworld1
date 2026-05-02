@@ -46,7 +46,23 @@ function collectUI() {
     musicToggleBtn: document.getElementById("music-toggle-btn"),
     textSoundToggleBtn: document.getElementById("text-sound-toggle-btn"),
     canvas: document.getElementById("gameCanvas"),
-    interactionPrompt: document.getElementById("interaction-prompt")
+    interactionPrompt: document.getElementById("interaction-prompt"),
+    pauseToggleBtn: document.getElementById("pause-toggle-btn"),
+    pauseOverlay: document.getElementById("pause-overlay"),
+    pauseResumeBtn: document.getElementById("pause-resume-btn"),
+    pauseSaveBtn: document.getElementById("pause-save-btn"),
+    pauseLoadBtn: document.getElementById("pause-load-btn"),
+    pauseResetBtn: document.getElementById("pause-reset-btn"),
+    pauseArea: document.getElementById("pause-area"),
+    pauseStatCorruption: document.getElementById("pause-stat-corruption"),
+    pauseStatMercy: document.getElementById("pause-stat-mercy"),
+    pauseStatInfluence: document.getElementById("pause-stat-influence"),
+    pauseStatDevotion: document.getElementById("pause-stat-devotion"),
+    pauseStatConviction: document.getElementById("pause-stat-conviction"),
+    pauseStatFear: document.getElementById("pause-stat-fear"),
+    pauseStatDoubt: document.getElementById("pause-stat-doubt"),
+    pauseStatFollowers: document.getElementById("pause-stat-followers"),
+    pauseStatGold: document.getElementById("pause-stat-gold")
   };
 }
 
@@ -56,7 +72,10 @@ function getMissingElements(ui) {
     "startGameBtn", "continueGameBtn", "saveBtn", "loadBtn", "resetBtn", "introNextBtn",
     "statsToggleBtn", "closeStatsBtn", "statsOverlay", "areaLabel", "sceneTitle", "speakerName",
     "dialogueText", "choicesContainer", "relicList", "playerNameLabel", "statCorruption", "statMercy",
-    "statInfluence", "statDevotion", "statConviction", "statFear", "statDoubt", "statFollowers", "statGold"
+    "statInfluence", "statDevotion", "statConviction", "statFear", "statDoubt", "statFollowers", "statGold",
+    "pauseToggleBtn", "pauseOverlay", "pauseResumeBtn", "pauseSaveBtn", "pauseLoadBtn", "pauseResetBtn",
+    "pauseArea", "pauseStatCorruption", "pauseStatMercy", "pauseStatInfluence", "pauseStatDevotion",
+    "pauseStatConviction", "pauseStatFear", "pauseStatDoubt", "pauseStatFollowers", "pauseStatGold"
   ];
 
   return required.filter((name) => !ui[name]);
@@ -70,6 +89,46 @@ if (missing.length > 0) {
 } else {
   const game = new Game(ui.canvas, ui.interactionPrompt);
   let introIndex = 0;
+
+  let pauseMenuOpen = false;
+
+  function renderPauseStats() {
+    updateStats(ui);
+    ui.pauseArea.textContent = ui.sceneTitle.textContent || "Blackgrave Cemetery";
+    ui.pauseStatCorruption.textContent = ui.statCorruption.textContent;
+    ui.pauseStatMercy.textContent = ui.statMercy.textContent;
+    ui.pauseStatInfluence.textContent = ui.statInfluence.textContent;
+    ui.pauseStatDevotion.textContent = ui.statDevotion.textContent;
+    ui.pauseStatConviction.textContent = ui.statConviction.textContent;
+    ui.pauseStatFear.textContent = ui.statFear.textContent;
+    ui.pauseStatDoubt.textContent = ui.statDoubt.textContent;
+    ui.pauseStatFollowers.textContent = ui.statFollowers.textContent;
+    ui.pauseStatGold.textContent = ui.statGold.textContent;
+  }
+
+  function closePauseMenu() {
+    if (!pauseMenuOpen) return;
+    pauseMenuOpen = false;
+    ui.pauseOverlay.classList.add("hidden");
+    game.start();
+  }
+
+  function openPauseMenu() {
+    if (pauseMenuOpen || ui.gameScreen.classList.contains("hidden")) return;
+    pauseMenuOpen = true;
+    renderPauseStats();
+    ui.pauseOverlay.classList.remove("hidden");
+    game.stop();
+  }
+
+  function togglePauseMenu(forceOpen) {
+    const shouldOpen = typeof forceOpen === "boolean" ? forceOpen : !pauseMenuOpen;
+    if (shouldOpen) {
+      openPauseMenu();
+    } else {
+      closePauseMenu();
+    }
+  }
 
   function resizeCanvas() {
     const canvas = document.getElementById("gameCanvas");
@@ -86,6 +145,9 @@ if (missing.length > 0) {
     ui.gameScreen.classList.toggle("hidden", screenName !== "game");
     if (screenName !== "game") {
       ui.statsOverlay.classList.add("hidden");
+      pauseMenuOpen = false;
+      ui.pauseOverlay.classList.add("hidden");
+      game.stop();
     }
   }
 
@@ -116,6 +178,8 @@ if (missing.length > 0) {
     closeDialogue({ force: true, suppressCallback: true });
     syncUIAfterStateChange();
     setScreen("game");
+    pauseMenuOpen = false;
+    ui.pauseOverlay.classList.add("hidden");
     game.start();
     updateContinueButtonState();
   }
@@ -202,6 +266,36 @@ if (missing.length > 0) {
     ui.resetBtn.addEventListener("click", handleReset);
     ui.statsToggleBtn.addEventListener("click", () => toggleRecords());
     ui.closeStatsBtn.addEventListener("click", () => toggleRecords(false));
+
+    ui.pauseToggleBtn.addEventListener("click", () => togglePauseMenu());
+    ui.pauseResumeBtn.addEventListener("click", () => closePauseMenu());
+    ui.pauseSaveBtn.addEventListener("click", () => {
+      saveGame();
+      updateContinueButtonState();
+      renderPauseStats();
+    });
+    ui.pauseLoadBtn.addEventListener("click", () => {
+      const loaded = loadGame();
+      if (!loaded) return;
+      game.restorePlayerPosition();
+      renderPauseStats();
+      updateContinueButtonState();
+    });
+    ui.pauseResetBtn.addEventListener("click", () => {
+      handleReset();
+      closePauseMenu();
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.repeat) return;
+      if (event.key === "p" || event.key === "P") {
+        event.preventDefault();
+        togglePauseMenu();
+      } else if (event.key === "Escape" && pauseMenuOpen) {
+        event.preventDefault();
+        closePauseMenu();
+      }
+    });
   }
 
   init();
