@@ -49,18 +49,25 @@ export const CHOICE_HANDLERS = {
 };
 
 
+function getRewardKey(interactionId) {
+  if (!interactionId) return null;
+  return String(interactionId);
+}
+
 function hasRewardedInteraction(interactionId) {
-  if (!interactionId) return false;
-  return Array.isArray(gameState.rewardedInteractions) && gameState.rewardedInteractions.includes(interactionId);
+  const rewardKey = getRewardKey(interactionId);
+  if (!rewardKey) return false;
+  return Array.isArray(gameState.rewardedInteractions) && gameState.rewardedInteractions.includes(rewardKey);
 }
 
 function markInteractionRewarded(interactionId) {
-  if (!interactionId) return;
+  const rewardKey = getRewardKey(interactionId);
+  if (!rewardKey) return;
   if (!Array.isArray(gameState.rewardedInteractions)) {
     gameState.rewardedInteractions = [];
   }
-  if (!gameState.rewardedInteractions.includes(interactionId)) {
-    gameState.rewardedInteractions.push(interactionId);
+  if (!gameState.rewardedInteractions.includes(rewardKey)) {
+    gameState.rewardedInteractions.push(rewardKey);
   }
 }
 
@@ -70,6 +77,6 @@ export function runChoiceAction(action, interactionId = null) {
 
   if (hasRewardedInteraction(interactionId)) return;
 
-  handler();
   markInteractionRewarded(interactionId);
+  handler();
 }
