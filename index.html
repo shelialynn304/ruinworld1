@@ -42,6 +42,19 @@
   <div id="gameScreen" class="game-screen hidden">
     <canvas id="gameCanvas" aria-label="Graveyard map" role="img"></canvas>
 
+    <div id="mobile-controls" class="mobile-controls hidden" aria-label="Mobile controls">
+      <div class="mobile-dpad">
+        <button type="button" class="mobile-btn mobile-btn-up" data-control="up" aria-label="Move up">▲</button>
+        <button type="button" class="mobile-btn mobile-btn-left" data-control="left" aria-label="Move left">◀</button>
+        <button type="button" class="mobile-btn mobile-btn-down" data-control="down" aria-label="Move down">▼</button>
+        <button type="button" class="mobile-btn mobile-btn-right" data-control="right" aria-label="Move right">▶</button>
+      </div>
+      <div class="mobile-actions">
+        <button type="button" class="mobile-btn mobile-action-pause" data-control="pause" aria-label="Pause">Pause</button>
+        <button type="button" class="mobile-btn mobile-action-interact" data-control="interact" aria-label="Interact">Interact</button>
+      </div>
+    </div>
+
     <div id="uiOverlay">
       <div class="game-hud">
         <div class="hud-left">

@@ -1,4 +1,4 @@
-import { setupInput } from "./input.js";
+import { setupInput, setVirtualDirection, triggerVirtualInteract, releaseVirtualInteract, clearInputState } from "./input.js";
 import { Game } from "./game.js";
 import { initDialogue, updateStats, closeDialogue } from "./dialogue.js";
 import { saveGame, loadGame, clearSave, hasSaveData } from "./save.js";
@@ -62,7 +62,8 @@ function collectUI() {
     pauseStatFear: document.getElementById("pause-stat-fear"),
     pauseStatDoubt: document.getElementById("pause-stat-doubt"),
     pauseStatFollowers: document.getElementById("pause-stat-followers"),
-    pauseStatGold: document.getElementById("pause-stat-gold")
+    pauseStatGold: document.getElementById("pause-stat-gold"),
+    mobileControls: document.getElementById("mobile-controls")
   };
 }
 
@@ -74,7 +75,7 @@ function getMissingElements(ui) {
     "dialogueText", "choicesContainer", "relicList", "playerNameLabel", "statCorruption", "statMercy",
     "statInfluence", "statDevotion", "statConviction", "statFear", "statDoubt", "statFollowers", "statGold",
     "pauseToggleBtn", "pauseOverlay", "pauseResumeBtn", "pauseSaveBtn", "pauseLoadBtn", "pauseResetBtn",
-    "pauseArea", "pauseStatCorruption", "pauseStatMercy", "pauseStatInfluence", "pauseStatDevotion",
+    "pauseArea", "pauseStatCorruption", "pauseStatMercy", "pauseStatInfluence", "pauseStatDevotion", "mobileControls",
     "pauseStatConviction", "pauseStatFear", "pauseStatDoubt", "pauseStatFollowers", "pauseStatGold"
   ];
 
@@ -108,17 +109,21 @@ if (missing.length > 0) {
 
   function closePauseMenu() {
     if (!pauseMenuOpen) return;
+    clearInputState();
     pauseMenuOpen = false;
     ui.pauseOverlay.classList.add("hidden");
     game.start();
+    refreshMobileControls();
   }
 
   function openPauseMenu() {
     if (pauseMenuOpen || ui.gameScreen.classList.contains("hidden")) return;
+    clearInputState();
     pauseMenuOpen = true;
     renderPauseStats();
     ui.pauseOverlay.classList.remove("hidden");
     game.stop();
+    refreshMobileControls();
   }
 
   function togglePauseMenu(forceOpen) {
@@ -144,11 +149,84 @@ if (missing.length > 0) {
     ui.introScreen.classList.toggle("hidden", screenName !== "intro");
     ui.gameScreen.classList.toggle("hidden", screenName !== "game");
     if (screenName !== "game") {
+      clearInputState();
       ui.statsOverlay.classList.add("hidden");
       pauseMenuOpen = false;
       ui.pauseOverlay.classList.add("hidden");
       game.stop();
     }
+    refreshMobileControls();
+  }
+
+  function isMobileGameplayActive() {
+    return !ui.gameScreen.classList.contains("hidden") && !pauseMenuOpen;
+  }
+
+  function showMobileControls() {
+    ui.mobileControls.classList.remove("hidden");
+  }
+
+  function hideMobileControls() {
+    ui.mobileControls.classList.add("hidden");
+  }
+
+  function refreshMobileControls() {
+    if (isMobileGameplayActive()) {
+      showMobileControls();
+    } else {
+      hideMobileControls();
+    }
+  }
+
+  let mobileControlsBound = false;
+  function bindMobileControlsOnce() {
+    if (mobileControlsBound) return;
+    mobileControlsBound = true;
+
+    const activePointers = new Map();
+    const clearVirtualInput = () => {
+      activePointers.clear();
+      clearInputState();
+    };
+
+    const releasePointer = (pointerId) => {
+      const control = activePointers.get(pointerId);
+      if (!control) return;
+      if (control === "interact") releaseVirtualInteract();
+      if (control === "up" || control === "down" || control === "left" || control === "right") {
+        setVirtualDirection(control, false);
+      }
+      activePointers.delete(pointerId);
+    };
+
+    ui.mobileControls.addEventListener("pointerdown", (event) => {
+      const button = event.target.closest("[data-control]");
+      if (!button || !isMobileGameplayActive()) return;
+      event.preventDefault();
+      const control = button.dataset.control;
+      activePointers.set(event.pointerId, control);
+      button.setPointerCapture?.(event.pointerId);
+
+      if (control === "interact") {
+        triggerVirtualInteract();
+      } else if (control === "pause") {
+        togglePauseMenu(true);
+      } else {
+        setVirtualDirection(control, true);
+      }
+    });
+
+    ["pointerup", "pointercancel", "pointerleave"].forEach((eventName) => {
+      ui.mobileControls.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        releasePointer(event.pointerId);
+      });
+    });
+
+    window.addEventListener("blur", clearVirtualInput);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) clearVirtualInput();
+    });
   }
 
   function updateContinueButtonState() {
@@ -224,6 +302,7 @@ if (missing.length > 0) {
 
   function handleReset() {
     game.stop();
+    clearInputState();
     clearSave();
     resetState();
     game.resetPlayerPosition();
@@ -243,6 +322,7 @@ if (missing.length > 0) {
 
   function init() {
     setupInput();
+    bindMobileControlsOnce();
     initDialogue(ui);
     disableAudioButtons();
     syncUIAfterStateChange();
