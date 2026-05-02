@@ -52,6 +52,31 @@
 
       <div id="interaction-prompt" class="interaction-prompt hidden">Press E</div>
 
+      <button id="pause-toggle-btn" class="small-btn pause-toggle-btn" type="button" aria-label="Pause menu">Pause</button>
+
+      <aside id="pause-overlay" class="pause-overlay hidden" aria-modal="true" role="dialog" aria-label="Paused">
+        <div class="pause-panel">
+          <h2 class="panel-title">Paused</h2>
+          <div class="pause-stats-list">
+            <div class="stat-row"><span>Area</span><strong id="pause-area">Blackgrave Cemetery</strong></div>
+            <div class="stat-row"><span>Corruption</span><strong id="pause-stat-corruption">0</strong></div>
+            <div class="stat-row"><span>Mercy</span><strong id="pause-stat-mercy">0</strong></div>
+            <div class="stat-row"><span>Influence</span><strong id="pause-stat-influence">0</strong></div>
+            <div class="stat-row"><span>Devotion</span><strong id="pause-stat-devotion">0</strong></div>
+            <div class="stat-row"><span>Conviction</span><strong id="pause-stat-conviction">0</strong></div>
+            <div class="stat-row"><span>Fear</span><strong id="pause-stat-fear">0</strong></div>
+            <div class="stat-row"><span>Doubt</span><strong id="pause-stat-doubt">0</strong></div>
+            <div class="stat-row"><span>Followers</span><strong id="pause-stat-followers">0</strong></div>
+            <div class="stat-row"><span>Gold</span><strong id="pause-stat-gold">0</strong></div>
+          </div>
+          <div class="pause-actions">
+            <button id="pause-resume-btn" class="main-btn" type="button">Resume</button>
+            <button id="pause-save-btn" class="small-btn" type="button">Save</button>
+            <button id="pause-load-btn" class="small-btn" type="button">Load</button>
+            <button id="pause-reset-btn" class="ghost-btn" type="button">Reset</button>
+          </div>
+        </div>
+      </aside>
       <section id="dialogue-panel" class="dialogue-box hidden" aria-live="polite">
         <div class="speaker-row">
           <span class="speaker-tag">Speaker</span>
