@@ -120,6 +120,7 @@ if (missing.length > 0) {
     if (!pauseMenuOpen) return;
     clearInputState();
     pauseMenuOpen = false;
+    ui.pauseOverlay?.parentElement?.classList.remove("pause-open");
     ui.pauseOverlay.classList.add("hidden");
     game.start();
     refreshMobileControls();
@@ -130,6 +131,7 @@ if (missing.length > 0) {
     clearInputState();
     pauseMenuOpen = true;
     renderPauseStats();
+    ui.pauseOverlay?.parentElement?.classList.add("pause-open");
     ui.pauseOverlay.classList.remove("hidden");
     game.stop();
     refreshMobileControls();
@@ -161,6 +163,7 @@ if (missing.length > 0) {
       clearInputState();
       ui.statsOverlay.classList.add("hidden");
       pauseMenuOpen = false;
+      ui.pauseOverlay?.parentElement?.classList.remove("pause-open");
       ui.pauseOverlay.classList.add("hidden");
       game.stop();
     }
@@ -267,6 +270,7 @@ if (missing.length > 0) {
     syncUIAfterStateChange();
     setScreen("game");
     pauseMenuOpen = false;
+    ui.pauseOverlay?.parentElement?.classList.remove("pause-open");
     ui.pauseOverlay.classList.add("hidden");
     game.start();
     updateContinueButtonState();
