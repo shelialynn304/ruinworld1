@@ -1,151 +1,175 @@
-window.audioSystem = {
-  musicEnabled: false,
-  textSoundsEnabled: true,
-  audioContext: null,
-  textSoundCounter: 0,
-  currentMusicOscillators: [],
+const AUDIO_PREF_KEY = "branch_and_bone_audio_enabled";
 
-  init() {
-    this.updateMusicButton();
-    this.updateTextSoundButton();
+const AUDIO_PATHS = {
+  sfx: {
+    "menu-click": "assets/audio/sfx/menu-click.mp3",
+    "text-blip": "assets/audio/sfx/text-blip.mp3",
+    interact: "assets/audio/sfx/interact.mp3",
+    "save-success": "assets/audio/sfx/save-success.mp3",
+    "load-success": "assets/audio/sfx/load-success.mp3"
   },
-
-  ensureContext() {
-    if (!this.audioContext) {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) {
-        this.audioContext = new AudioContextClass();
-      }
-    }
-
-    if (this.audioContext && this.audioContext.state === "suspended") {
-      this.audioContext.resume();
-    }
+  ambience: {
+    rain: "assets/audio/ambience/rain-loop.mp3",
+    thunder1: "assets/audio/ambience/thunder-1.mp3"
   },
-
-  startMusic() {
-    this.musicEnabled = true;
-    this.updateMusicButton();
-    this.ensureContext();
-    this.stopMusic();
-    this.playAmbientDrone();
-  },
-
-  stopMusic() {
-    this.currentMusicOscillators.forEach((item) => {
-      try {
-        item.osc.stop();
-      } catch (error) {
-        console.warn("Music stop warning:", error);
-      }
-    });
-    this.currentMusicOscillators = [];
-  },
-
-  toggleMusic() {
-    this.ensureContext();
-
-    if (this.musicEnabled) {
-      this.musicEnabled = false;
-      this.stopMusic();
-    } else {
-      this.musicEnabled = true;
-      this.playAmbientDrone();
-    }
-
-    this.updateMusicButton();
-  },
-
-  toggleTextSounds() {
-    this.textSoundsEnabled = !this.textSoundsEnabled;
-    this.updateTextSoundButton();
-  },
-
-  updateMusicButton() {
-    const btn = document.getElementById("music-toggle-btn");
-    if (btn) {
-      btn.textContent = `Music: ${this.musicEnabled ? "On" : "Off"}`;
-    }
-  },
-
-  updateTextSoundButton() {
-    const btn = document.getElementById("text-sound-toggle-btn");
-    if (btn) {
-      btn.textContent = `Text Sounds: ${this.textSoundsEnabled ? "On" : "Off"}`;
-    }
-  },
-
-  handleTypedCharacter(char, speakerName) {
-    if (!this.textSoundsEnabled) return;
-    if (!char || /\s/.test(char)) return;
-
-    this.textSoundCounter += 1;
-
-    if (this.textSoundCounter % 3 !== 0) return;
-
-    this.playDialogueBlip(speakerName);
-  },
-
-  playDialogueBlip(speakerName) {
-    this.ensureContext();
-    if (!this.audioContext) return;
-
-    const osc = this.audioContext.createOscillator();
-    const gain = this.audioContext.createGain();
-
-    const voice = this.getVoiceProfile(speakerName);
-    osc.type = voice.wave;
-    osc.frequency.value = voice.base + Math.random() * voice.variance;
-
-    gain.gain.setValueAtTime(0.0001, this.audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(voice.volume, this.audioContext.currentTime + 0.005);
-    gain.gain.exponentialRampToValueAtTime(0.0001, this.audioContext.currentTime + voice.duration);
-
-    osc.connect(gain);
-    gain.connect(this.audioContext.destination);
-
-    osc.start();
-    osc.stop(this.audioContext.currentTime + voice.duration + 0.01);
-  },
-
-  getVoiceProfile(speakerName) {
-    const name = String(speakerName || "").toLowerCase();
-
-    if (name.includes("old woman") || name.includes("mara")) {
-      return { base: 180, variance: 22, volume: 0.015, duration: 0.06, wave: "square" };
-    }
-
-    if (name.includes("oracle")) {
-      return { base: 320, variance: 40, volume: 0.012, duration: 0.08, wave: "triangle" };
-    }
-
-    if (name.includes("narrator")) {
-      return { base: 210, variance: 18, volume: 0.01, duration: 0.05, wave: "triangle" };
-    }
-
-    return { base: 260, variance: 28, volume: 0.014, duration: 0.05, wave: "square" };
-  },
-
-  playAmbientDrone() {
-    if (!this.musicEnabled) return;
-    this.ensureContext();
-    if (!this.audioContext) return;
-
-    const notes = [110, 146.83, 164.81];
-    this.currentMusicOscillators = notes.map((freq, index) => {
-      const osc = this.audioContext.createOscillator();
-      const gain = this.audioContext.createGain();
-
-      osc.type = index === 0 ? "triangle" : "sine";
-      osc.frequency.value = freq;
-
-      gain.gain.value = index === 0 ? 0.018 : 0.009;
-
-      osc.connect(gain);
-      gain.connect(this.audioContext.destination);
-      osc.start();
-
-      return { osc, gain };
-    });
+  music: {
+    title: "assets/audio/music/title-theme.mp3",
+    graveyard: "assets/audio/music/graveyard-loop.mp3"
   }
+};
+
+const warnedMissingPaths = new Set();
+const ambiencePlayers = new Map();
+
+let audioEnabled = true;
+let audioUnlocked = false;
+let audioContext = null;
+
+function readAudioPreference() {
+  const stored = localStorage.getItem(AUDIO_PREF_KEY);
+  if (stored === "false") return false;
+  if (stored === "true") return true;
+  return true;
+}
+
+function writeAudioPreference(enabled) {
+  localStorage.setItem(AUDIO_PREF_KEY, enabled ? "true" : "false");
+}
+
+function ensureAudioContext() {
+  if (!audioContext) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      audioContext = new AudioContextClass();
+    }
+  }
+
+  if (audioContext && audioContext.state === "suspended") {
+    audioContext.resume().catch(() => {});
+  }
+}
+
+function resolveAudioPath(soundKey, kind) {
+  const group = AUDIO_PATHS[kind] || {};
+  return group[soundKey] || null;
+}
+
+function warnMissing(path) {
+  if (!path || warnedMissingPaths.has(path)) return;
+  warnedMissingPaths.add(path);
+  console.warn(`[audio] Missing audio file: ${path}`);
+}
+
+function createAudio(path, loop = false) {
+  const audio = new Audio(path);
+  audio.loop = loop;
+  audio.preload = "none";
+  audio.addEventListener("error", () => warnMissing(path), { once: true });
+  return audio;
+}
+
+function initAudio() {
+  audioEnabled = readAudioPreference();
+  updateAudioButtons();
+}
+
+function unlockAudio() {
+  audioUnlocked = true;
+  ensureAudioContext();
+}
+
+function setAudioEnabled(enabled) {
+  audioEnabled = Boolean(enabled);
+  writeAudioPreference(audioEnabled);
+
+  if (!audioEnabled) {
+    stopAllAmbience();
+  }
+
+  updateAudioButtons();
+}
+
+function isAudioEnabled() {
+  return audioEnabled;
+}
+
+function playSound(soundKey) {
+  if (!audioEnabled || !audioUnlocked) return;
+
+  const path = resolveAudioPath(soundKey, "sfx");
+  if (!path) return;
+
+  const audio = createAudio(path);
+  audio.play().catch(() => warnMissing(path));
+}
+
+function playAmbience(ambienceKey) {
+  if (!audioEnabled || !audioUnlocked) return;
+  if (ambiencePlayers.has(ambienceKey)) return;
+
+  const path = resolveAudioPath(ambienceKey, "ambience") || resolveAudioPath(ambienceKey, "music");
+  if (!path) return;
+
+  const audio = createAudio(path, true);
+  ambiencePlayers.set(ambienceKey, audio);
+  audio.play().catch(() => {
+    warnMissing(path);
+    ambiencePlayers.delete(ambienceKey);
+  });
+}
+
+function stopAmbience(ambienceKey) {
+  const audio = ambiencePlayers.get(ambienceKey);
+  if (!audio) return;
+  audio.pause();
+  audio.currentTime = 0;
+  ambiencePlayers.delete(ambienceKey);
+}
+
+function stopAllAmbience() {
+  for (const key of ambiencePlayers.keys()) {
+    stopAmbience(key);
+  }
+}
+
+function updateAudioButtons() {
+  const musicBtn = document.getElementById("music-toggle-btn");
+  const textBtn = document.getElementById("text-sound-toggle-btn");
+  const label = `Audio: ${audioEnabled ? "On" : "Off"}`;
+
+  [musicBtn, textBtn].forEach((btn) => {
+    if (!btn) return;
+    btn.disabled = false;
+    btn.classList.remove("is-disabled");
+    btn.removeAttribute("aria-disabled");
+    btn.textContent = label;
+    btn.title = "Toggle audio";
+  });
+}
+
+window.audioSystem = {
+  initAudio,
+  unlockAudio,
+  setAudioEnabled,
+  isAudioEnabled,
+  playSound,
+  playAmbience,
+  stopAmbience,
+  stopAllAmbience,
+  handleTypedCharacter(char) {
+    if (!char || /\s/.test(char)) return;
+    if (Math.random() > 0.35) return;
+    playSound("text-blip");
+  }
+};
+
+export {
+  initAudio,
+  unlockAudio,
+  setAudioEnabled,
+  isAudioEnabled,
+  playSound,
+  playAmbience,
+  stopAmbience,
+  stopAllAmbience
 };
