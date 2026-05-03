@@ -3,6 +3,7 @@ import { Game } from "./game.js";
 import { initDialogue, updateStats, closeDialogue } from "./dialogue.js";
 import { saveGame, loadGame, clearSave, hasSaveData } from "./save.js";
 import { resetState } from "./state.js";
+import { initAudio, unlockAudio, setMusicEnabled, setEffectsEnabled, isMusicEnabled, isEffectsEnabled, playSound, playAmbience } from "./audio.js";
 
 const INTRO_LINES = [
   "You wake on wet earth between broken graves, your name split like glass.",
@@ -250,21 +251,13 @@ if (missing.length > 0) {
     ui.resetBtn.classList.toggle("hidden", !hasSave);
   }
 
-  function disableAudioButtons() {
-    [ui.musicToggleBtn, ui.textSoundToggleBtn].forEach((btn) => {
-      if (!btn) return;
-      btn.disabled = true;
-      btn.classList.add("is-disabled");
-      btn.title = "Audio controls return in a later build";
-      btn.setAttribute("aria-disabled", "true");
-    });
-  }
 
   function syncUIAfterStateChange() {
     updateStats(ui);
   }
 
   function beginGameplay() {
+    playAmbience("rain");
     document.body.requestFullscreen?.().catch(() => {});
     closeDialogue({ force: true, suppressCallback: true });
     syncUIAfterStateChange();
@@ -288,6 +281,8 @@ if (missing.length > 0) {
   }
 
   function startNewGame() {
+    unlockAudio();
+    playSound("menu-click");
     game.stop();
     resetState();
     game.resetPlayerPosition();
@@ -300,11 +295,15 @@ if (missing.length > 0) {
   }
 
   function continueGame() {
+    unlockAudio();
+    playSound("menu-click");
     game.stop();
     return handleLoadToGameplay();
   }
 
   function handleReset() {
+    unlockAudio();
+    playSound("menu-click");
     game.stop();
     clearInputState();
     clearSave();
@@ -318,6 +317,7 @@ if (missing.length > 0) {
 
   function handleSave() {
     saveGame();
+    playSound("save-success");
     updateContinueButtonState();
   }
 
@@ -329,6 +329,7 @@ if (missing.length > 0) {
       return false;
     }
 
+    playSound("load-success");
     beginGameplay();
     return true;
   }
@@ -343,15 +344,17 @@ if (missing.length > 0) {
 
   function init() {
     setupInput();
+    initAudio();
     bindMobileControlsOnce();
     initDialogue(ui);
-    disableAudioButtons();
     syncUIAfterStateChange();
     closeDialogue({ force: true, suppressCallback: true });
     setScreen("title");
     updateContinueButtonState();
 
     ui.startGameBtn.addEventListener("click", startNewGame);
+    const unlockFromAnyClick = () => unlockAudio();
+    document.addEventListener("pointerdown", unlockFromAnyClick, { once: true });
     ui.continueGameBtn.addEventListener("click", continueGame);
     ui.introNextBtn.addEventListener("click", advanceIntro);
 
@@ -362,11 +365,44 @@ if (missing.length > 0) {
     });
 
     ui.resetBtn.addEventListener("click", handleReset);
-    ui.statsToggleBtn.addEventListener("click", () => toggleRecords());
-    ui.closeStatsBtn.addEventListener("click", () => toggleRecords(false));
+    ui.musicToggleBtn?.addEventListener("click", () => {
+      unlockAudio();
+      const nextEnabled = !isMusicEnabled();
+      setMusicEnabled(nextEnabled);
+      if (nextEnabled && !ui.gameScreen.classList.contains("hidden")) {
+        playAmbience("rain");
+      }
+      playSound("menu-click");
+    });
 
-    ui.pauseToggleBtn.addEventListener("click", () => togglePauseMenu());
-    ui.pauseResumeBtn.addEventListener("click", () => closePauseMenu());
+    ui.textSoundToggleBtn?.addEventListener("click", () => {
+      unlockAudio();
+      const nextEnabled = !isEffectsEnabled();
+      setEffectsEnabled(nextEnabled);
+      playSound("menu-click");
+    });
+
+    ui.statsToggleBtn.addEventListener("click", () => {
+      unlockAudio();
+      playSound("menu-click");
+      toggleRecords();
+    });
+    ui.closeStatsBtn.addEventListener("click", () => {
+      unlockAudio();
+      playSound("menu-click");
+      toggleRecords(false);
+    });
+
+    ui.pauseToggleBtn.addEventListener("click", () => {
+      unlockAudio();
+      playSound("menu-click");
+      togglePauseMenu();
+    });
+    ui.pauseResumeBtn.addEventListener("click", () => {
+      unlockAudio();
+      playSound("menu-click");
+      closePauseMenu();
+    });
     ui.pauseSaveBtn.addEventListener("click", () => {
       handleSave();
       renderPauseStats();
@@ -377,6 +413,7 @@ if (missing.length > 0) {
       closePauseMenu();
     });
     ui.pauseResetBtn.addEventListener("click", () => {
+      playSound("menu-click");
       handleReset();
       closePauseMenu();
     });
