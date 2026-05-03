@@ -83,6 +83,15 @@ function getMissingElements(ui) {
 }
 
 const ui = collectUI();
+console.log("pause buttons", {
+  pauseOverlay: ui.pauseOverlay,
+  pauseSaveBtn: ui.pauseSaveBtn,
+  pauseLoadBtn: ui.pauseLoadBtn,
+  pauseResetBtn: ui.pauseResetBtn,
+  pauseSaveParent: ui.pauseSaveBtn?.parentElement,
+  pauseLoadParent: ui.pauseLoadBtn?.parentElement,
+  pauseResetParent: ui.pauseResetBtn?.parentElement
+});
 const missing = getMissingElements(ui);
 
 if (missing.length > 0) {
@@ -111,6 +120,7 @@ if (missing.length > 0) {
     if (!pauseMenuOpen) return;
     clearInputState();
     pauseMenuOpen = false;
+    ui.pauseOverlay?.parentElement?.classList.remove("pause-open");
     ui.pauseOverlay.classList.add("hidden");
     game.start();
     refreshMobileControls();
@@ -121,6 +131,7 @@ if (missing.length > 0) {
     clearInputState();
     pauseMenuOpen = true;
     renderPauseStats();
+    ui.pauseOverlay?.parentElement?.classList.add("pause-open");
     ui.pauseOverlay.classList.remove("hidden");
     game.stop();
     refreshMobileControls();
@@ -152,6 +163,7 @@ if (missing.length > 0) {
       clearInputState();
       ui.statsOverlay.classList.add("hidden");
       pauseMenuOpen = false;
+      ui.pauseOverlay?.parentElement?.classList.remove("pause-open");
       ui.pauseOverlay.classList.add("hidden");
       game.stop();
     }
@@ -240,6 +252,7 @@ if (missing.length > 0) {
 
   function disableAudioButtons() {
     [ui.musicToggleBtn, ui.textSoundToggleBtn].forEach((btn) => {
+      if (!btn) return;
       btn.disabled = true;
       btn.classList.add("is-disabled");
       btn.title = "Audio controls return in a later build";
@@ -257,6 +270,7 @@ if (missing.length > 0) {
     syncUIAfterStateChange();
     setScreen("game");
     pauseMenuOpen = false;
+    ui.pauseOverlay?.parentElement?.classList.remove("pause-open");
     ui.pauseOverlay.classList.add("hidden");
     game.start();
     updateContinueButtonState();
@@ -315,7 +329,6 @@ if (missing.length > 0) {
       return false;
     }
 
-    game.restorePlayerPosition();
     beginGameplay();
     return true;
   }

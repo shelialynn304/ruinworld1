@@ -151,18 +151,29 @@ button {
 
 #uiOverlay {
   position: absolute;
-  bottom: 0;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   padding: 10px;
-  background: rgba(0, 0, 0, 0.6);
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0) 45%);
   color: white;
   font-family: monospace;
   pointer-events: none;
 }
 
+#uiOverlay.pause-open {
+  pointer-events: auto;
+}
+
 .game-hud,
 .dialogue-box,
-.interaction-prompt {
+.interaction-prompt,
+.pause-overlay,
+.pause-panel,
+.pause-actions {
   pointer-events: auto;
 }
 
@@ -388,15 +399,28 @@ button:disabled {
   pointer-events: auto;
 }
 
+#pause-overlay,
 .pause-overlay {
   position: absolute;
   inset: 0;
-  z-index: 8;
+  z-index: 20;
   background: rgba(0, 0, 0, 0.72);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+}
+
+#pause-overlay {
+  pointer-events: auto;
+  z-index: 30;
+}
+
+#pause-overlay button,
+#pause-overlay .pause-panel,
+#pause-overlay .pause-actions,
+.pause-overlay button {
+  pointer-events: auto;
 }
 
 .pause-panel {

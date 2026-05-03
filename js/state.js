@@ -11,7 +11,7 @@ export const gameState = {
   followerCount: 0,
   gold: 0,
   relics: [],
-  rewardedInteractions: [],
+  completedInteractions: {},
   memoryState: "fractured",
   graveClue: null,
   playerPosition: { x: 96, y: 360 },
@@ -40,7 +40,7 @@ export function getDefaultState() {
     followerCount: 0,
     gold: 0,
     relics: [],
-    rewardedInteractions: [],
+    completedInteractions: {},
     memoryState: "fractured",
     graveClue: null,
     playerPosition: { x: 96, y: 360 },
@@ -60,7 +60,13 @@ export function applyState(nextState) {
   Object.assign(gameState, getDefaultState(), nextState);
   gameState.flags = { ...getDefaultState().flags, ...(nextState.flags || {}) };
   gameState.relics = Array.isArray(nextState.relics) ? nextState.relics : [];
-  gameState.rewardedInteractions = Array.isArray(nextState.rewardedInteractions) ? nextState.rewardedInteractions : [];
+  const completedFromObject = nextState.completedInteractions && typeof nextState.completedInteractions === "object"
+    ? nextState.completedInteractions
+    : {};
+  const completedFromArray = Array.isArray(nextState.rewardedInteractions)
+    ? Object.fromEntries(nextState.rewardedInteractions.map((id) => [String(id), true]))
+    : {};
+  gameState.completedInteractions = { ...completedFromArray, ...completedFromObject };
   gameState.playerPosition = {
     ...getDefaultState().playerPosition,
     ...(nextState.playerPosition || {})
