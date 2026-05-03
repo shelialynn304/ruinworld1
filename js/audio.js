@@ -1,4 +1,5 @@
-const AUDIO_PREF_KEY = "branch_and_bone_audio_enabled";
+const MUSIC_PREF_KEY = "branch_and_bone_music_enabled";
+const EFFECTS_PREF_KEY = "branch_and_bone_effects_enabled";
 
 const AUDIO_PATHS = {
   sfx: {
@@ -21,19 +22,16 @@ const AUDIO_PATHS = {
 const warnedMissingPaths = new Set();
 const ambiencePlayers = new Map();
 
-let audioEnabled = true;
+let musicEnabled = true;
+let effectsEnabled = true;
 let audioUnlocked = false;
 let audioContext = null;
 
-function readAudioPreference() {
-  const stored = localStorage.getItem(AUDIO_PREF_KEY);
+function readPreference(key, fallback = true) {
+  const stored = localStorage.getItem(key);
   if (stored === "false") return false;
   if (stored === "true") return true;
-  return true;
-}
-
-function writeAudioPreference(enabled) {
-  localStorage.setItem(AUDIO_PREF_KEY, enabled ? "true" : "false");
+  return fallback;
 }
 
 function ensureAudioContext() {
@@ -69,7 +67,8 @@ function createAudio(path, loop = false) {
 }
 
 function initAudio() {
-  audioEnabled = readAudioPreference();
+  musicEnabled = readPreference(MUSIC_PREF_KEY, true);
+  effectsEnabled = readPreference(EFFECTS_PREF_KEY, true);
   updateAudioButtons();
 }
 
@@ -78,24 +77,29 @@ function unlockAudio() {
   ensureAudioContext();
 }
 
-function setAudioEnabled(enabled) {
-  audioEnabled = Boolean(enabled);
-  writeAudioPreference(audioEnabled);
-
-  if (!audioEnabled) {
-    stopAllAmbience();
-  }
-
+function setMusicEnabled(enabled) {
+  musicEnabled = Boolean(enabled);
+  localStorage.setItem(MUSIC_PREF_KEY, musicEnabled ? "true" : "false");
+  if (!musicEnabled) stopAllAmbience();
   updateAudioButtons();
 }
 
-function isAudioEnabled() {
-  return audioEnabled;
+function setEffectsEnabled(enabled) {
+  effectsEnabled = Boolean(enabled);
+  localStorage.setItem(EFFECTS_PREF_KEY, effectsEnabled ? "true" : "false");
+  updateAudioButtons();
+}
+
+function isMusicEnabled() {
+  return musicEnabled;
+}
+
+function isEffectsEnabled() {
+  return effectsEnabled;
 }
 
 function playSound(soundKey) {
-  if (!audioEnabled || !audioUnlocked) return;
-
+  if (!effectsEnabled || !audioUnlocked) return;
   const path = resolveAudioPath(soundKey, "sfx");
   if (!path) return;
 
@@ -104,7 +108,7 @@ function playSound(soundKey) {
 }
 
 function playAmbience(ambienceKey) {
-  if (!audioEnabled || !audioUnlocked) return;
+  if (!musicEnabled || !audioUnlocked) return;
   if (ambiencePlayers.has(ambienceKey)) return;
 
   const path = resolveAudioPath(ambienceKey, "ambience") || resolveAudioPath(ambienceKey, "music");
@@ -127,31 +131,37 @@ function stopAmbience(ambienceKey) {
 }
 
 function stopAllAmbience() {
-  for (const key of ambiencePlayers.keys()) {
-    stopAmbience(key);
-  }
+  for (const key of ambiencePlayers.keys()) stopAmbience(key);
 }
 
 function updateAudioButtons() {
   const musicBtn = document.getElementById("music-toggle-btn");
-  const textBtn = document.getElementById("text-sound-toggle-btn");
-  const label = `Audio: ${audioEnabled ? "On" : "Off"}`;
+  const effectsBtn = document.getElementById("text-sound-toggle-btn");
 
-  [musicBtn, textBtn].forEach((btn) => {
-    if (!btn) return;
-    btn.disabled = false;
-    btn.classList.remove("is-disabled");
-    btn.removeAttribute("aria-disabled");
-    btn.textContent = label;
-    btn.title = "Toggle audio";
-  });
+  if (musicBtn) {
+    musicBtn.disabled = false;
+    musicBtn.classList.remove("is-disabled");
+    musicBtn.removeAttribute("aria-disabled");
+    musicBtn.textContent = `Music: ${musicEnabled ? "On" : "Off"}`;
+    musicBtn.title = "Toggle music";
+  }
+
+  if (effectsBtn) {
+    effectsBtn.disabled = false;
+    effectsBtn.classList.remove("is-disabled");
+    effectsBtn.removeAttribute("aria-disabled");
+    effectsBtn.textContent = `Effects: ${effectsEnabled ? "On" : "Off"}`;
+    effectsBtn.title = "Toggle effects";
+  }
 }
 
 window.audioSystem = {
   initAudio,
   unlockAudio,
-  setAudioEnabled,
-  isAudioEnabled,
+  setMusicEnabled,
+  setEffectsEnabled,
+  isMusicEnabled,
+  isEffectsEnabled,
   playSound,
   playAmbience,
   stopAmbience,
@@ -166,8 +176,10 @@ window.audioSystem = {
 export {
   initAudio,
   unlockAudio,
-  setAudioEnabled,
-  isAudioEnabled,
+  setMusicEnabled,
+  setEffectsEnabled,
+  isMusicEnabled,
+  isEffectsEnabled,
   playSound,
   playAmbience,
   stopAmbience,

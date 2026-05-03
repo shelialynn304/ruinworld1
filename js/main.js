@@ -3,7 +3,7 @@ import { Game } from "./game.js";
 import { initDialogue, updateStats, closeDialogue } from "./dialogue.js";
 import { saveGame, loadGame, clearSave, hasSaveData } from "./save.js";
 import { resetState } from "./state.js";
-import { initAudio, unlockAudio, setAudioEnabled, isAudioEnabled, playSound, playAmbience } from "./audio.js";
+import { initAudio, unlockAudio, setMusicEnabled, setEffectsEnabled, isMusicEnabled, isEffectsEnabled, playSound, playAmbience } from "./audio.js";
 
 const INTRO_LINES = [
   "You wake on wet earth between broken graves, your name split like glass.",
@@ -365,18 +365,22 @@ if (missing.length > 0) {
     });
 
     ui.resetBtn.addEventListener("click", handleReset);
-    const toggleAudio = () => {
+    ui.musicToggleBtn?.addEventListener("click", () => {
       unlockAudio();
-      const nextEnabled = !isAudioEnabled();
-      setAudioEnabled(nextEnabled);
-      playSound("menu-click");
+      const nextEnabled = !isMusicEnabled();
+      setMusicEnabled(nextEnabled);
       if (nextEnabled && !ui.gameScreen.classList.contains("hidden")) {
         playAmbience("rain");
       }
-    };
+      playSound("menu-click");
+    });
 
-    ui.musicToggleBtn?.addEventListener("click", toggleAudio);
-    ui.textSoundToggleBtn?.addEventListener("click", toggleAudio);
+    ui.textSoundToggleBtn?.addEventListener("click", () => {
+      unlockAudio();
+      const nextEnabled = !isEffectsEnabled();
+      setEffectsEnabled(nextEnabled);
+      playSound("menu-click");
+    });
 
     ui.statsToggleBtn.addEventListener("click", () => {
       unlockAudio();
