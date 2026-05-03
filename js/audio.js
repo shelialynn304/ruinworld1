@@ -7,11 +7,11 @@ const AUDIO_PATHS = {
     "text-blip": "assets/audio/sfx/text-blip.mp3",
     interact: "assets/audio/sfx/interact.mp3",
     "save-success": "assets/audio/sfx/save-success.mp3",
-    "load-success": "assets/audio/sfx/load-success.mp3",
-    thunder1: "assets/audio/ambience/thunder-1.mp3"
+    "load-success": "assets/audio/sfx/load-success.mp3"
   },
   ambience: {
-    rain: "assets/audio/ambience/rain-loop.mp3"
+    rain: "assets/audio/ambience/rain-loop.mp3",
+    thunder1: "assets/audio/ambience/thunder-1.mp3"
   },
   music: {
     title: "assets/audio/music/title-theme.mp3",
@@ -41,6 +41,7 @@ function ensureAudioContext() {
       audioContext = new AudioContextClass();
     }
   }
+
   if (audioContext && audioContext.state === "suspended") {
     audioContext.resume().catch(() => {});
   }
