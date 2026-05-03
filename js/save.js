@@ -8,7 +8,22 @@ export function hasSaveData() {
 }
 
 export function saveGame() {
-  localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+  const payload = {
+    version: 1,
+    stats: {
+      corruption: gameState.corruption,
+      mercy: gameState.mercy,
+      influence: gameState.influence,
+      devotion: gameState.devotion,
+      conviction: gameState.conviction,
+      fear: gameState.fear,
+      doubt: gameState.doubt,
+      followerCount: gameState.followerCount,
+      gold: gameState.gold
+    },
+    completedInteractions: gameState.completedInteractions || {}
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
 }
 
 export function loadGame() {
@@ -34,13 +49,18 @@ export function clearSave() {
 }
 
 function migrateSave(raw) {
+  const stats = raw.stats || raw;
+
   return {
-    ...raw,
-    playerPosition: raw.playerPosition || {
-      x: Number(raw.playerX) || 96,
-      y: Number(raw.playerY) || 360
-    },
-    currentArea: raw.currentArea || raw.area || "Blackgrave Cemetery",
-    memoryState: raw.memoryState || "fractured"
+    corruption: Number(stats.corruption) || 0,
+    mercy: Number(stats.mercy) || 0,
+    influence: Number(stats.influence) || 0,
+    devotion: Number(stats.devotion) || 0,
+    conviction: Number(stats.conviction) || 0,
+    fear: Number(stats.fear) || 0,
+    doubt: Number(stats.doubt) || 0,
+    followerCount: Number(stats.followerCount) || 0,
+    gold: Number(stats.gold) || 0,
+    completedInteractions: raw.completedInteractions || raw.rewardedInteractions || {}
   };
 }

@@ -307,12 +307,10 @@ if (missing.length > 0) {
     updateContinueButtonState();
   }
 
-  function handleLoadToGameplay({ onFailure } = {}) {
+  function handleLoadToGameplay({ stayOnCurrentScreen = false } = {}) {
     const loaded = loadGame();
     if (!loaded) {
-      if (typeof onFailure === "function") {
-        onFailure();
-      } else {
+      if (!stayOnCurrentScreen) {
         setScreen("title");
       }
       updateContinueButtonState();
@@ -363,7 +361,7 @@ if (missing.length > 0) {
       renderPauseStats();
     });
     ui.pauseLoadBtn.addEventListener("click", () => {
-      const loaded = handleLoadToGameplay({ onFailure: () => {} });
+      const loaded = handleLoadToGameplay({ stayOnCurrentScreen: true });
       if (!loaded) return;
       closePauseMenu();
     });
