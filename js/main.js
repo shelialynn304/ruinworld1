@@ -271,15 +271,28 @@ if (missing.length > 0) {
     updateContinueButtonState();
   }
 
-  function playIntroLightningFlash() {
+  function playIntroLightningFlash(transitionNumber) {
     const flashEl = ui.introLightningFlash;
-    if (!flashEl) {
-      return 180;
+    const flashCount = transitionNumber === 1 ? 1 : transitionNumber === 2 ? 0 : transitionNumber === 3 ? 2 : 1;
+
+    if (flashCount === 0) {
+      return 0;
     }
 
-    flashEl.classList.remove("is-active");
-    flashEl.offsetWidth;
-    flashEl.classList.add("is-active");
+    const triggerFlash = () => {
+      if (!flashEl) return;
+      flashEl.classList.remove("is-active");
+      flashEl.offsetWidth;
+      flashEl.classList.add("is-active");
+    };
+
+    triggerFlash();
+
+    if (flashCount === 2) {
+      window.setTimeout(triggerFlash, 95);
+      return 220;
+    }
+
     return 180;
   }
 
@@ -294,7 +307,7 @@ if (missing.length > 0) {
     isIntroTransitioning = true;
     ui.introNextBtn.disabled = true;
 
-    const flashDurationMs = playIntroLightningFlash();
+    const flashDurationMs = playIntroLightningFlash(introIndex);
     window.setTimeout(() => {
       ui.introSequenceText.textContent = INTRO_LINES[introIndex];
       introIndex += 1;
