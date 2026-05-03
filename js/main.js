@@ -287,17 +287,7 @@ if (missing.length > 0) {
 
   function continueGame() {
     game.stop();
-    const loaded = loadGame();
-
-    if (!loaded) {
-      setScreen("title");
-      updateContinueButtonState();
-      return false;
-    }
-
-    game.restorePlayerPosition();
-    beginGameplay();
-    return true;
+    return handleLoadToGameplay();
   }
 
   function handleReset() {
@@ -310,6 +300,24 @@ if (missing.length > 0) {
     syncUIAfterStateChange();
     setScreen("title");
     updateContinueButtonState();
+  }
+
+  function handleSave() {
+    saveGame();
+    updateContinueButtonState();
+  }
+
+  function handleLoadToGameplay() {
+    const loaded = loadGame();
+    if (!loaded) {
+      setScreen("title");
+      updateContinueButtonState();
+      return false;
+    }
+
+    game.restorePlayerPosition();
+    beginGameplay();
+    return true;
   }
 
   function toggleRecords(forceOpen) {
@@ -334,10 +342,7 @@ if (missing.length > 0) {
     ui.continueGameBtn.addEventListener("click", continueGame);
     ui.introNextBtn.addEventListener("click", advanceIntro);
 
-    ui.saveBtn.addEventListener("click", () => {
-      saveGame();
-      updateContinueButtonState();
-    });
+    ui.saveBtn.addEventListener("click", handleSave);
 
     ui.loadBtn.addEventListener("click", () => {
       continueGame();
@@ -350,16 +355,13 @@ if (missing.length > 0) {
     ui.pauseToggleBtn.addEventListener("click", () => togglePauseMenu());
     ui.pauseResumeBtn.addEventListener("click", () => closePauseMenu());
     ui.pauseSaveBtn.addEventListener("click", () => {
-      saveGame();
-      updateContinueButtonState();
+      handleSave();
       renderPauseStats();
     });
     ui.pauseLoadBtn.addEventListener("click", () => {
-      const loaded = loadGame();
+      const loaded = handleLoadToGameplay();
       if (!loaded) return;
-      game.restorePlayerPosition();
-      renderPauseStats();
-      updateContinueButtonState();
+      closePauseMenu();
     });
     ui.pauseResetBtn.addEventListener("click", () => {
       handleReset();
