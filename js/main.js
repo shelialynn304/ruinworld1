@@ -240,6 +240,7 @@ if (missing.length > 0) {
 
   function disableAudioButtons() {
     [ui.musicToggleBtn, ui.textSoundToggleBtn].forEach((btn) => {
+      if (!btn) return;
       btn.disabled = true;
       btn.classList.add("is-disabled");
       btn.title = "Audio controls return in a later build";
@@ -315,7 +316,6 @@ if (missing.length > 0) {
       return false;
     }
 
-    game.restorePlayerPosition();
     beginGameplay();
     return true;
   }

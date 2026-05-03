@@ -8,7 +8,21 @@ export function hasSaveData() {
 }
 
 export function saveGame() {
-  localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+  const saveData = {
+    playerName: gameState.playerName,
+    currentArea: gameState.currentArea,
+    corruption: gameState.corruption,
+    mercy: gameState.mercy,
+    influence: gameState.influence,
+    devotion: gameState.devotion,
+    conviction: gameState.conviction,
+    fear: gameState.fear,
+    doubt: gameState.doubt,
+    followerCount: gameState.followerCount,
+    gold: gameState.gold,
+    rewardedInteractions: Array.isArray(gameState.rewardedInteractions) ? [...gameState.rewardedInteractions] : []
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
 }
 
 export function loadGame() {
@@ -34,13 +48,20 @@ export function clearSave() {
 }
 
 function migrateSave(raw) {
+  const completedInteractions = Array.isArray(raw.completedInteractions) ? raw.completedInteractions : [];
+  const rewardedInteractions = Array.isArray(raw.rewardedInteractions) ? raw.rewardedInteractions : [];
   return {
-    ...raw,
-    playerPosition: raw.playerPosition || {
-      x: Number(raw.playerX) || 96,
-      y: Number(raw.playerY) || 360
-    },
+    playerName: raw.playerName || "Wanderer",
     currentArea: raw.currentArea || raw.area || "Blackgrave Cemetery",
-    memoryState: raw.memoryState || "fractured"
+    corruption: Number(raw.corruption) || 0,
+    mercy: Number(raw.mercy) || 0,
+    influence: Number(raw.influence) || 0,
+    devotion: Number(raw.devotion) || 0,
+    conviction: Number(raw.conviction) || 0,
+    fear: Number(raw.fear) || 0,
+    doubt: Number(raw.doubt) || 0,
+    followerCount: Number(raw.followerCount) || 0,
+    gold: Number(raw.gold) || 0,
+    rewardedInteractions: rewardedInteractions.length ? rewardedInteractions : completedInteractions
   };
 }
