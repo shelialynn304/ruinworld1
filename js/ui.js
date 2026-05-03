@@ -116,6 +116,9 @@ window.renderChoices = function (scene) {
     btn.textContent = choice.text;
     btn.addEventListener("click", () => {
       if (ui.isTypingSceneText) return;
+      if (window.audioSystem && typeof window.audioSystem.playSound === "function") {
+        window.audioSystem.playSound("interact");
+      }
       if (typeof handleChoiceAction === "function") {
         handleChoiceAction(choice.action);
       }
