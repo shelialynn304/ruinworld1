@@ -83,6 +83,15 @@ function getMissingElements(ui) {
 }
 
 const ui = collectUI();
+console.log("pause buttons", {
+  pauseOverlay: ui.pauseOverlay,
+  pauseSaveBtn: ui.pauseSaveBtn,
+  pauseLoadBtn: ui.pauseLoadBtn,
+  pauseResetBtn: ui.pauseResetBtn,
+  pauseSaveParent: ui.pauseSaveBtn?.parentElement,
+  pauseLoadParent: ui.pauseLoadBtn?.parentElement,
+  pauseResetParent: ui.pauseResetBtn?.parentElement
+});
 const missing = getMissingElements(ui);
 
 if (missing.length > 0) {

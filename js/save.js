@@ -9,18 +9,23 @@ export function hasSaveData() {
 
 export function saveGame() {
   const saveData = {
-    playerName: gameState.playerName,
-    currentArea: gameState.currentArea,
-    corruption: gameState.corruption,
-    mercy: gameState.mercy,
-    influence: gameState.influence,
-    devotion: gameState.devotion,
-    conviction: gameState.conviction,
-    fear: gameState.fear,
-    doubt: gameState.doubt,
-    followerCount: gameState.followerCount,
-    gold: gameState.gold,
-    rewardedInteractions: Array.isArray(gameState.rewardedInteractions) ? [...gameState.rewardedInteractions] : []
+    version: 1,
+    stats: {
+      playerName: gameState.playerName,
+      currentArea: gameState.currentArea,
+      corruption: gameState.corruption,
+      mercy: gameState.mercy,
+      influence: gameState.influence,
+      devotion: gameState.devotion,
+      conviction: gameState.conviction,
+      fear: gameState.fear,
+      doubt: gameState.doubt,
+      followerCount: gameState.followerCount,
+      gold: gameState.gold
+    },
+    completedInteractions: gameState.completedInteractions && typeof gameState.completedInteractions === "object"
+      ? { ...gameState.completedInteractions }
+      : {}
   };
   localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
 }
@@ -48,20 +53,24 @@ export function clearSave() {
 }
 
 function migrateSave(raw) {
+  const stats = raw.stats && typeof raw.stats === "object" ? raw.stats : raw;
   const completedInteractions = Array.isArray(raw.completedInteractions) ? raw.completedInteractions : [];
   const rewardedInteractions = Array.isArray(raw.rewardedInteractions) ? raw.rewardedInteractions : [];
+  const completedMap = raw.completedInteractions && typeof raw.completedInteractions === "object" && !Array.isArray(raw.completedInteractions)
+    ? raw.completedInteractions
+    : Object.fromEntries((rewardedInteractions.length ? rewardedInteractions : completedInteractions).map((id) => [String(id), true]));
   return {
-    playerName: raw.playerName || "Wanderer",
-    currentArea: raw.currentArea || raw.area || "Blackgrave Cemetery",
-    corruption: Number(raw.corruption) || 0,
-    mercy: Number(raw.mercy) || 0,
-    influence: Number(raw.influence) || 0,
-    devotion: Number(raw.devotion) || 0,
-    conviction: Number(raw.conviction) || 0,
-    fear: Number(raw.fear) || 0,
-    doubt: Number(raw.doubt) || 0,
-    followerCount: Number(raw.followerCount) || 0,
-    gold: Number(raw.gold) || 0,
-    rewardedInteractions: rewardedInteractions.length ? rewardedInteractions : completedInteractions
+    playerName: stats.playerName || "Wanderer",
+    currentArea: stats.currentArea || raw.area || "Blackgrave Cemetery",
+    corruption: Number(stats.corruption) || 0,
+    mercy: Number(stats.mercy) || 0,
+    influence: Number(stats.influence) || 0,
+    devotion: Number(stats.devotion) || 0,
+    conviction: Number(stats.conviction) || 0,
+    fear: Number(stats.fear) || 0,
+    doubt: Number(stats.doubt) || 0,
+    followerCount: Number(stats.followerCount) || 0,
+    gold: Number(stats.gold) || 0,
+    completedInteractions: completedMap
   };
 }
