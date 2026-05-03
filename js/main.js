@@ -83,6 +83,15 @@ function getMissingElements(ui) {
 }
 
 const ui = collectUI();
+console.log("pause buttons", {
+  pauseOverlay: ui.pauseOverlay,
+  pauseSaveBtn: ui.pauseSaveBtn,
+  pauseLoadBtn: ui.pauseLoadBtn,
+  pauseResetBtn: ui.pauseResetBtn,
+  pauseSaveParent: ui.pauseSaveBtn?.parentElement,
+  pauseLoadParent: ui.pauseLoadBtn?.parentElement,
+  pauseResetParent: ui.pauseResetBtn?.parentElement
+});
 const missing = getMissingElements(ui);
 
 if (missing.length > 0) {
@@ -240,6 +249,7 @@ if (missing.length > 0) {
 
   function disableAudioButtons() {
     [ui.musicToggleBtn, ui.textSoundToggleBtn].forEach((btn) => {
+      if (!btn) return;
       btn.disabled = true;
       btn.classList.add("is-disabled");
       btn.title = "Audio controls return in a later build";
@@ -315,7 +325,6 @@ if (missing.length > 0) {
       return false;
     }
 
-    game.restorePlayerPosition();
     beginGameplay();
     return true;
   }
