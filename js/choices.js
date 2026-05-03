@@ -57,18 +57,16 @@ function getRewardKey(interactionId) {
 function hasRewardedInteraction(interactionId) {
   const rewardKey = getRewardKey(interactionId);
   if (!rewardKey) return false;
-  return Array.isArray(gameState.rewardedInteractions) && gameState.rewardedInteractions.includes(rewardKey);
+  return Boolean(gameState.completedInteractions?.[rewardKey]);
 }
 
 function markInteractionRewarded(interactionId) {
   const rewardKey = getRewardKey(interactionId);
   if (!rewardKey) return;
-  if (!Array.isArray(gameState.rewardedInteractions)) {
-    gameState.rewardedInteractions = [];
+  if (!gameState.completedInteractions || typeof gameState.completedInteractions !== "object") {
+    gameState.completedInteractions = {};
   }
-  if (!gameState.rewardedInteractions.includes(rewardKey)) {
-    gameState.rewardedInteractions.push(rewardKey);
-  }
+  gameState.completedInteractions[rewardKey] = true;
 }
 
 export function runChoiceAction(action, interactionId = null) {
