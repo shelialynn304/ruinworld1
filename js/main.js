@@ -35,6 +35,7 @@ function collectUI() {
     introScreen: document.getElementById("intro-screen"),
     introSequenceText: document.getElementById("intro-sequence-text"),
     introNextBtn: document.getElementById("intro-next-btn"),
+    introLightningFlash: document.getElementById("intro-lightning-flash"),
     gameScreen: document.getElementById("gameScreen"),
     statsOverlay: document.getElementById("stats-overlay"),
     statsToggleBtn: document.getElementById("stats-toggle-btn"),
@@ -100,6 +101,7 @@ if (missing.length > 0) {
 } else {
   const game = new Game(ui.canvas, ui.interactionPrompt);
   let introIndex = 0;
+  let isIntroTransitioning = false;
 
   let pauseMenuOpen = false;
 
@@ -269,15 +271,37 @@ if (missing.length > 0) {
     updateContinueButtonState();
   }
 
+  function playIntroLightningFlash() {
+    const flashEl = ui.introLightningFlash;
+    if (!flashEl) {
+      return 180;
+    }
+
+    flashEl.classList.remove("is-active");
+    flashEl.offsetWidth;
+    flashEl.classList.add("is-active");
+    return 180;
+  }
+
   function advanceIntro() {
+    if (isIntroTransitioning) return;
+
     if (introIndex >= INTRO_LINES.length) {
       beginGameplay();
       return;
     }
 
-    ui.introSequenceText.textContent = INTRO_LINES[introIndex];
-    introIndex += 1;
-    ui.introNextBtn.textContent = introIndex >= INTRO_LINES.length ? "Enter the Graveyard" : "Continue";
+    isIntroTransitioning = true;
+    ui.introNextBtn.disabled = true;
+
+    const flashDurationMs = playIntroLightningFlash();
+    window.setTimeout(() => {
+      ui.introSequenceText.textContent = INTRO_LINES[introIndex];
+      introIndex += 1;
+      ui.introNextBtn.textContent = introIndex >= INTRO_LINES.length ? "Enter the Graveyard" : "Continue";
+      ui.introNextBtn.disabled = false;
+      isIntroTransitioning = false;
+    }, flashDurationMs);
   }
 
   function startNewGame() {
@@ -291,7 +315,9 @@ if (missing.length > 0) {
 
     introIndex = 0;
     setScreen("intro");
-    advanceIntro();
+    ui.introSequenceText.textContent = INTRO_LINES[introIndex];
+    introIndex += 1;
+    ui.introNextBtn.textContent = introIndex >= INTRO_LINES.length ? "Enter the Graveyard" : "Continue";
   }
 
   function continueGame() {

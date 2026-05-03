@@ -122,6 +122,31 @@ button {
   gap: 8px;
 }
 
+
+.intro-screen {
+  position: fixed;
+  overflow: hidden;
+}
+
+#intro-lightning-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 2;
+  background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.95), rgba(205, 222, 255, 0.38) 42%, rgba(0, 0, 0, 0) 78%);
+}
+
+#intro-lightning-flash.is-active {
+  animation: introLightningFlash 180ms ease-out;
+}
+
+@keyframes introLightningFlash {
+  0% { opacity: 0; }
+  30% { opacity: 0.92; }
+  100% { opacity: 0; }
+}
+
 .intro-sequence-text {
   min-height: 120px;
   max-width: 760px;
