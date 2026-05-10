@@ -73,7 +73,11 @@ export const GRAVEYARD_MAP = {
 
     { x: 736, y: 640, width: 32, height: 128, type: "fence" },
     { x: 1440, y: 512, width: 32, height: 160, type: "fence" },
-    { x: 2576, y: 800, width: 32, height: 160, type: "fence" }
+    { x: 2576, y: 800, width: 32, height: 160, type: "fence" },
+
+    { x: 724, y: 1112, width: 16, height: 18, type: "spookytree1" },
+    { x: 2160, y: 420, width: 16, height: 18, type: "spookytree1" },
+    { x: 2704, y: 1104, width: 16, height: 18, type: "spookytree1" }
   ],
    interactables: [
     { id: "chapel-door", label: "Chapel Door", x: 2320, y: 352, width: 96, height: 32, radius: 64, sceneId: "chapelDoor" },
