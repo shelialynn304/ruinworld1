@@ -39,10 +39,25 @@ function tileNoise(x, y, seed = 0) {
   return n - Math.floor(n);
 }
 
+function toRenderInteger(value) {
+  return Math.round(value);
+}
+
+export function disableCanvasImageSmoothing(ctx) {
+  ctx.imageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
+}
+
 function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
   if (!tile || !tileSprite.complete || tileSprite.naturalWidth === 0) {
     return false;
   }
+
+  const drawX = toRenderInteger(dx);
+  const drawY = toRenderInteger(dy);
+  const drawSize = toRenderInteger(size);
 
   ctx.drawImage(
     tileSprite,
@@ -50,10 +65,10 @@ function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
     tile.row * TILE_SIZE,
     TILE_SIZE,
     TILE_SIZE,
-    dx,
-    dy,
-    size,
-    size
+    drawX,
+    drawY,
+    drawSize,
+    drawSize
   );
 
   return true;
@@ -204,18 +219,18 @@ function drawSpookyTreeProp(ctx, obstacle) {
     return;
   }
 
-  const width = obstacle.drawWidth || spookyTreeImage.naturalWidth;
-  const height = obstacle.drawHeight || spookyTreeImage.naturalHeight;
-  const x = Math.round(obstacle.x + obstacle.width / 2 - width / 2);
-  const y = Math.round(obstacle.y + obstacle.height - height);
+  const width = toRenderInteger(obstacle.drawWidth || spookyTreeImage.naturalWidth);
+  const height = toRenderInteger(obstacle.drawHeight || spookyTreeImage.naturalHeight);
+  const x = toRenderInteger(obstacle.x + obstacle.width / 2 - width / 2);
+  const y = toRenderInteger(obstacle.y + obstacle.height - height);
 
   ctx.save();
 
   ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
   ctx.beginPath();
   ctx.ellipse(
-    Math.round(obstacle.x + obstacle.width / 2),
-    Math.round(obstacle.y + obstacle.height - 1),
+    toRenderInteger(obstacle.x + obstacle.width / 2),
+    toRenderInteger(obstacle.y + obstacle.height - 1),
     Math.max(10, obstacle.width * 1.5),
     Math.max(4, obstacle.height * 0.35),
     0,
@@ -258,10 +273,10 @@ function drawObstacle(ctx, obstacle) {
     highlight: "#5c5350"
   };
 
-  const x = Math.round(obstacle.x);
-  const y = Math.round(obstacle.y);
-  const width = Math.round(obstacle.width);
-  const height = Math.round(obstacle.height);
+  const x = toRenderInteger(obstacle.x);
+  const y = toRenderInteger(obstacle.y);
+  const width = toRenderInteger(obstacle.width);
+  const height = toRenderInteger(obstacle.height);
 
   ctx.save();
 
@@ -416,8 +431,8 @@ function drawBuildingBlock(ctx, x, y, width, height, colors) {
 }
 
 function getPlayerSpriteDrawMetrics(player) {
-  const drawX = Math.round(player.x + player.width / 2 - PLAYER_DRAW_SIZE / 2);
-  const drawY = Math.round(player.y + player.height - PLAYER_DRAW_SIZE + PLAYER_FEET_OFFSET);
+  const drawX = toRenderInteger(player.x + player.width / 2 - PLAYER_DRAW_SIZE / 2);
+  const drawY = toRenderInteger(player.y + player.height - PLAYER_DRAW_SIZE + PLAYER_FEET_OFFSET);
 
   return { drawX, drawY };
 }
@@ -452,11 +467,16 @@ function drawPlayerSprite(ctx, player) {
     );
   } else {
     ctx.fillStyle = "#b8a46f";
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    const fallbackX = toRenderInteger(player.x);
+    const fallbackY = toRenderInteger(player.y);
+    const fallbackWidth = toRenderInteger(player.width);
+    const fallbackHeight = toRenderInteger(player.height);
+
+    ctx.fillRect(fallbackX, fallbackY, fallbackWidth, fallbackHeight);
 
     ctx.fillStyle = "#111";
-    ctx.fillRect(player.x + 6, player.y + 8, 4, 4);
-    ctx.fillRect(player.x + player.width - 10, player.y + 8, 4, 4);
+    ctx.fillRect(fallbackX + 6, fallbackY + 8, 4, 4);
+    ctx.fillRect(fallbackX + fallbackWidth - 10, fallbackY + 8, 4, 4);
   }
 
   if (DEBUG_PLAYER_RENDER) {
@@ -523,7 +543,12 @@ function getCamera(canvasWidth, canvasHeight, map, player) {
   const offsetX = map.width < visibleWidth ? (canvasWidth - map.width * CAMERA_ZOOM) / 2 : 0;
   const offsetY = map.height < visibleHeight ? (canvasHeight - map.height * CAMERA_ZOOM) / 2 : 0;
 
-  return { cameraX, cameraY, offsetX, offsetY };
+  return {
+    cameraX: toRenderInteger(cameraX),
+    cameraY: toRenderInteger(cameraY),
+    offsetX: toRenderInteger(offsetX),
+    offsetY: toRenderInteger(offsetY)
+  };
 }
 
 
@@ -573,19 +598,22 @@ export function renderScene(ctx, map, player, nearbyInteractable, timeMs = 0) {
   const { cameraX, cameraY, offsetX, offsetY } = getCamera(canvasWidth, canvasHeight, map, player);
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.imageSmoothingEnabled = false;
+  disableCanvasImageSmoothing(ctx);
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
   ctx.fillStyle = "#090b10";
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+  const renderOffsetX = toRenderInteger(offsetX - cameraX * CAMERA_ZOOM);
+  const renderOffsetY = toRenderInteger(offsetY - cameraY * CAMERA_ZOOM);
 
   ctx.setTransform(
     CAMERA_ZOOM,
     0,
     0,
     CAMERA_ZOOM,
-    offsetX - cameraX * CAMERA_ZOOM,
-    offsetY - cameraY * CAMERA_ZOOM
+    renderOffsetX,
+    renderOffsetY
   );
 
   drawGround(ctx, map);
