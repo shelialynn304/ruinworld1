@@ -20,6 +20,12 @@ playerSprite.src = "assets/images/rogues.png";
 const tileSprite = new Image();
 tileSprite.src = "assets/images/tiles.png";
 
+const spookyTreeImage = new Image();
+spookyTreeImage.addEventListener("error", () => {
+  console.warn("Failed to load environment prop image: assets/images/spookytree1.png");
+});
+spookyTreeImage.src = "assets/images/spookytree1.png";
+
 // Tiles are disabled for now because the current coordinates were pulling ugly/broken tiles.
 const GROUND_BASE_TILE = null;
 const GROUND_VARIANTS = [];
@@ -193,7 +199,42 @@ function drawRain(ctx, width, height, timeMs) {
   ctx.restore();
 }
 
+function drawSpookyTreeProp(ctx, obstacle) {
+  if (!spookyTreeImage.complete || spookyTreeImage.naturalWidth === 0) {
+    return;
+  }
+
+  const width = obstacle.drawWidth || spookyTreeImage.naturalWidth;
+  const height = obstacle.drawHeight || spookyTreeImage.naturalHeight;
+  const x = Math.round(obstacle.x + obstacle.width / 2 - width / 2);
+  const y = Math.round(obstacle.y + obstacle.height - height);
+
+  ctx.save();
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+  ctx.beginPath();
+  ctx.ellipse(
+    Math.round(obstacle.x + obstacle.width / 2),
+    Math.round(obstacle.y + obstacle.height - 1),
+    Math.max(10, obstacle.width * 1.5),
+    Math.max(4, obstacle.height * 0.35),
+    0,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
+
+  ctx.drawImage(spookyTreeImage, x, y, width, height);
+
+  ctx.restore();
+}
+
 function drawObstacle(ctx, obstacle) {
+  if (obstacle.type === "spookytree1") {
+    drawSpookyTreeProp(ctx, obstacle);
+    return;
+  }
+
   const palette = {
     grave_plot: { base: "#2c2a28", shadow: "#1f1d1b", highlight: "#3a3532" },
     headstone: { base: "#4a4643", shadow: "#2b2826", highlight: "#615a56" },
