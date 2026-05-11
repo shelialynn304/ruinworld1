@@ -20,11 +20,24 @@ playerSprite.src = "assets/images/rogues.png";
 const tileSprite = new Image();
 tileSprite.src = "assets/images/tiles.png";
 
-const spookyTreeImage = new Image();
-spookyTreeImage.addEventListener("error", () => {
-  console.warn("Failed to load environment prop image: assets/images/spookytree1.png");
-});
-spookyTreeImage.src = "assets/images/spookytree1.png";
+let spookySpriteFailed = false;
+const spookySprite = new Image();
+spookySprite.src = "assets/images/spookysprite1";
+spookySprite.onerror = () => {
+  spookySpriteFailed = true;
+};
+
+const SPOOKY_SPRITE_CROPS = {
+  groundMoss: { sx: 0, sy: 0, sw: 16, sh: 16 },
+  pathDirt: { sx: 16, sy: 0, sw: 16, sh: 16 },
+  graveRound: { sx: 0, sy: 16, sw: 16, sh: 16 },
+  graveCross: { sx: 16, sy: 16, sw: 16, sh: 16 },
+  graveLarge: { sx: 32, sy: 16, sw: 16, sh: 24 },
+  lantern: { sx: 48, sy: 16, sw: 16, sh: 24 },
+  spookyTree: { sx: 64, sy: 0, sw: 32, sh: 48 },
+  fencePiece: { sx: 0, sy: 48, sw: 32, sh: 16 },
+  wallPiece: { sx: 32, sy: 48, sw: 32, sh: 16 }
+};
 
 // Tiles are disabled for now because the current coordinates were pulling ugly/broken tiles.
 const GROUND_BASE_TILE = null;
@@ -39,15 +52,12 @@ function tileNoise(x, y, seed = 0) {
   return n - Math.floor(n);
 }
 
-function toRenderInteger(value) {
-  return Math.round(value);
+function isImageReady(image) {
+  return !spookySpriteFailed && image.complete && image.naturalWidth > 0;
 }
 
-export function disableCanvasImageSmoothing(ctx) {
-  ctx.imageSmoothingEnabled = false;
-  ctx.webkitImageSmoothingEnabled = false;
-  ctx.mozImageSmoothingEnabled = false;
-  ctx.msImageSmoothingEnabled = false;
+function cropFitsImage(crop, image) {
+  return crop.sx + crop.sw <= image.naturalWidth && crop.sy + crop.sh <= image.naturalHeight;
 }
 
 function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
@@ -69,6 +79,28 @@ function drawTile(ctx, tile, dx, dy, size = TILE_SIZE) {
     drawY,
     drawSize,
     drawSize
+  );
+
+  return true;
+}
+
+function drawSpookySprite(ctx, spriteKey, dx, dy, dw, dh) {
+  const crop = SPOOKY_SPRITE_CROPS[spriteKey];
+
+  if (!crop || !isImageReady(spookySprite) || !cropFitsImage(crop, spookySprite)) {
+    return false;
+  }
+
+  ctx.drawImage(
+    spookySprite,
+    crop.sx,
+    crop.sy,
+    crop.sw,
+    crop.sh,
+    dx,
+    dy,
+    dw,
+    dh
   );
 
   return true;
@@ -135,7 +167,9 @@ function drawGround(ctx, map) {
       const path = isMainPathTile(col, row, cols);
       const puddle = isPuddleTile(col, row);
 
-      drawFallbackTile(ctx, x, y, "#1c221d");
+      if (!drawSpookySprite(ctx, "groundMoss", x, y, TILE_SIZE, TILE_SIZE)) {
+        drawFallbackTile(ctx, x, y, "#1c221d");
+      }
 
       if (n1 > 0.96) {
         ctx.fillStyle = "#22261f";
@@ -160,11 +194,13 @@ function drawGround(ctx, map) {
       }
 
       if (path) {
-        ctx.fillStyle = "rgba(48, 38, 28, 0.55)";
-        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        if (!drawSpookySprite(ctx, "pathDirt", x, y, TILE_SIZE, TILE_SIZE)) {
+          ctx.fillStyle = "rgba(48, 38, 28, 0.55)";
+          ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
 
-        ctx.fillStyle = "rgba(0,0,0,0.15)";
-        ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+          ctx.fillStyle = "rgba(0,0,0,0.15)";
+          ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        }
       }
 
       if (!path && puddle && n3 > 0.35) {
@@ -264,7 +300,8 @@ function drawObstacle(ctx, obstacle) {
     cliff: { base: "#2d2e31", shadow: "#1d1f22", highlight: "#3f4145" },
     broken_wall: { base: "#3f3a38", shadow: "#272321", highlight: "#57504d" },
     mausoleum: { base: "#353237", shadow: "#232127", highlight: "#4b474f" },
-    unique_grave: { base: "#575147", shadow: "#353026", highlight: "#786f61" }
+    unique_grave: { base: "#575147", shadow: "#353026", highlight: "#786f61" },
+    lantern: { base: "#5f4b31", shadow: "#2a2118", highlight: "#d0a04f" }
   };
 
   const colors = palette[obstacle.type] || {
@@ -285,6 +322,11 @@ function drawObstacle(ctx, obstacle) {
   ctx.ellipse(x + width / 2, y + height - 1, width * 0.48, Math.max(3, height * 0.12), 0, 0, Math.PI * 2);
   ctx.fill();
 
+  if (obstacle.spriteKey && drawSpookySprite(ctx, obstacle.spriteKey, x, y, width, height)) {
+    ctx.restore();
+    return;
+  }
+
   if (obstacle.type === "headstone" || obstacle.type === "unique_grave") {
     drawHeadstone(ctx, x, y, width, height, colors);
   } else if (obstacle.type === "tree" || obstacle.type === "dead_tree") {
@@ -293,6 +335,8 @@ function drawObstacle(ctx, obstacle) {
     drawFenceOrGate(ctx, x, y, width, height, colors, obstacle.type === "gate");
   } else if (obstacle.type === "chapel" || obstacle.type === "mausoleum") {
     drawBuildingBlock(ctx, x, y, width, height, colors);
+  } else if (obstacle.type === "lantern") {
+    drawLantern(ctx, x, y, width, height, colors);
   } else {
     drawSimpleBlock(ctx, x, y, width, height, colors);
   }
@@ -394,6 +438,30 @@ function drawFenceOrGate(ctx, x, y, width, height, colors, isGate) {
     ctx.fillStyle = colors.highlight;
     ctx.fillRect(x + width / 2 - 1, y + 4, 2, height - 8);
   }
+}
+
+function drawLantern(ctx, x, y, width, height, colors) {
+  const postWidth = Math.max(4, width * 0.16);
+  const postX = x + width / 2 - postWidth / 2;
+  const flamePulse = 0.18 + Math.sin(Date.now() * 0.012) * 0.06;
+
+  ctx.fillStyle = `rgba(218, 166, 74, ${flamePulse})`;
+  ctx.beginPath();
+  ctx.ellipse(x + width / 2, y + height * 0.28, width * 0.7, height * 0.3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = colors.shadow;
+  ctx.fillRect(postX + 1, y + height * 0.2, postWidth, height * 0.8);
+
+  ctx.fillStyle = colors.base;
+  ctx.fillRect(postX, y + height * 0.18, postWidth, height * 0.82);
+  ctx.fillRect(x + width * 0.28, y + height * 0.12, width * 0.44, height * 0.1);
+
+  ctx.fillStyle = colors.highlight;
+  ctx.fillRect(x + width * 0.34, y, width * 0.32, height * 0.2);
+
+  ctx.fillStyle = "rgba(255, 205, 106, 0.75)";
+  ctx.fillRect(x + width * 0.42, y + height * 0.04, width * 0.16, height * 0.12);
 }
 
 function drawBuildingBlock(ctx, x, y, width, height, colors) {

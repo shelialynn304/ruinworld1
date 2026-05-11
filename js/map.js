@@ -58,10 +58,10 @@ export const GRAVEYARD_MAP = {
     { x: 1840, y: 768, width: 32, height: 20, type: "grave_plot" },
     { x: 1936, y: 768, width: 32, height: 20, type: "grave_plot" },
 
-    { x: 328, y: 1144, width: 16, height: 16, type: "headstone" },
-    { x: 424, y: 1144, width: 16, height: 16, type: "broken_stone" },
-    { x: 520, y: 1144, width: 16, height: 16, type: "headstone" },
-    { x: 616, y: 1144, width: 16, height: 16, type: "headstone" },
+    { x: 328, y: 1136, width: 24, height: 32, type: "headstone", spriteKey: "graveRound" },
+    { x: 424, y: 1136, width: 24, height: 32, type: "broken_stone", spriteKey: "graveCross" },
+    { x: 520, y: 1128, width: 28, height: 40, type: "headstone", spriteKey: "graveLarge" },
+    { x: 616, y: 1136, width: 24, height: 32, type: "headstone", spriteKey: "graveRound" },
     { x: 904, y: 1008, width: 16, height: 16, type: "headstone" },
     { x: 1000, y: 1008, width: 16, height: 16, type: "headstone" },
     { x: 1096, y: 1008, width: 16, height: 16, type: "broken_stone" },
@@ -71,13 +71,14 @@ export const GRAVEYARD_MAP = {
     { x: 1848, y: 848, width: 16, height: 16, type: "headstone" },
     { x: 1944, y: 848, width: 16, height: 16, type: "headstone" },
 
-    { x: 736, y: 640, width: 32, height: 128, type: "fence" },
-    { x: 1440, y: 512, width: 32, height: 160, type: "fence" },
-    { x: 2576, y: 800, width: 32, height: 160, type: "fence" },
+    { x: 736, y: 640, width: 32, height: 128, type: "fence", spriteKey: "fencePiece" },
+    { x: 1440, y: 512, width: 32, height: 160, type: "fence", spriteKey: "fencePiece" },
+    { x: 2576, y: 800, width: 32, height: 160, type: "fence", spriteKey: "fencePiece" },
 
-    { x: 724, y: 1112, width: 16, height: 18, type: "spookytree1" },
-    { x: 2160, y: 420, width: 16, height: 18, type: "spookytree1" },
-    { x: 2704, y: 1104, width: 16, height: 18, type: "spookytree1" }
+    { x: 272, y: 912, width: 88, height: 128, type: "dead_tree", spriteKey: "spookyTree" },
+    { x: 1360, y: 704, width: 88, height: 128, type: "dead_tree", spriteKey: "spookyTree" },
+    { x: 704, y: 1208, width: 40, height: 48, type: "lantern", spriteKey: "lantern" },
+    { x: 760, y: 1208, width: 96, height: 32, type: "broken_wall", spriteKey: "wallPiece" }
   ],
    interactables: [
     { id: "chapel-door", label: "Chapel Door", x: 2320, y: 352, width: 96, height: 32, radius: 64, sceneId: "chapelDoor" },
