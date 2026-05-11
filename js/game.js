@@ -1,6 +1,6 @@
 import { GRAVEYARD_MAP } from "./map.js";
 import { createPlayer, updatePlayer } from "./player.js";
-import { renderScene } from "./render.js";
+import { disableCanvasImageSmoothing, renderScene } from "./render.js";
 import { updateInteraction } from "./interaction.js";
 import { isDialogueOpen } from "./dialogue.js";
 import { gameState } from "./state.js";
@@ -9,6 +9,7 @@ export class Game {
   constructor(canvas, interactionPrompt) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
+    disableCanvasImageSmoothing(this.ctx);
     this.map = GRAVEYARD_MAP;
     this.player = createPlayer(gameState.playerPosition.x, gameState.playerPosition.y);
     this.interactionPrompt = interactionPrompt;
